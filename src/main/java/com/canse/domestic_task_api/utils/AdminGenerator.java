@@ -41,7 +41,7 @@ public class AdminGenerator {
             userService.addRoleToUser(envConfig.getAdminUsername(), "ADMIN");
         }else {
             System.out.println("-------------------------------");
-            System.out.println("| Admin and role already exist |");
+            System.out.println("| Admin and roles already exist |");
             System.out.println("-------------------------------");
         }
     }
