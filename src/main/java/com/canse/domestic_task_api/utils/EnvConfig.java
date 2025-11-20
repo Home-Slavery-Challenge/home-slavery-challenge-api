@@ -11,11 +11,15 @@ public class EnvConfig {
     Environment environment;
 
     public String getAdminUsername() {
-        return environment.getProperty("ADMINUSERNAME");
+        return environment.getProperty("ADMIN_USERNAME");
     }
 
-    public String getAdminPassword(){
-        return environment.getProperty("ADMINPASSWORD");
+    public String getAdminPassword() {
+        return environment.getProperty("ADMIN_PASSWORD");
+    }
+
+    public String getAdminEmail() {
+        return environment.getProperty("ADMIN_EMAIL");
     }
 
 }

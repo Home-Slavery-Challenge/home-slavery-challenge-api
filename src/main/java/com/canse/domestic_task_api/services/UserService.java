@@ -10,6 +10,7 @@ public interface UserService {
     User saveUser(User user);
     User findUserByUsername(String username);
     Role addRole(Role role);
+    List<Role> getRoles();
     User addRoleToUser(String username, String roleName);
     List<User> findAllUsers();
     User registerUser(RegistrationRequest request);
