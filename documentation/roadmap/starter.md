@@ -2,7 +2,7 @@
 
 ---
 
-# **Phase 0 — Foundations / Mise en place du projet (indispensable avant tout le reste)**
+# **Phase 0 — Foundations / Mise en place du projet **
 
 1. **Initialiser l’application**
 
@@ -81,8 +81,6 @@
     * Obligation de passer par PR.
     * Option : review obligatoire, tests verts, etc.
 
-   > Ces règles dépendent du branching model, donc logique de le définir d’abord.
-
 ---
 
 ## 🐳 Phase 3 – Dockerisation
@@ -120,4 +118,12 @@
 
     * Exemple : ne pas relancer build/deploy si seuls des fichiers de doc / README / `.md` changent.
     * Utiliser `paths` / `paths-ignore` dans les workflows.
+
+---
+
+## 👨🏻‍🎓 Phase 5 – Update de la doc
+
+9. **Mettre à jour le readme**
+
+10. **Mettre en place un sommaire pour la documentation**
 
