@@ -64,7 +64,6 @@
 1. **Créer les schémas UML des bases de données**
 
     * Clarifier les entités, relations, clés, contraintes.
-    * Ça sert de base pour tout le reste (code, migrations, validations…).
 
 ---
 

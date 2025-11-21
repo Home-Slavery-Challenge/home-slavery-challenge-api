@@ -4,7 +4,6 @@ import com.canse.slave.entities.Role;
 import com.canse.slave.entities.User;
 import com.canse.slave.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -14,9 +13,6 @@ public class AdminGenerator {
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Autowired
     private EnvConfig envConfig;
@@ -29,7 +25,7 @@ public class AdminGenerator {
             User admin = User.builder()
                     .username(envConfig.getAdminUsername())
                     .email(envConfig.getAdminEmail())
-                    .password(bCryptPasswordEncoder.encode(envConfig.getAdminPassword()))
+                    .password(envConfig.getAdminPassword())
                     .enabled(true)
                     .build();
 
