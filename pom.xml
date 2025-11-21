@@ -8,11 +8,11 @@
 		<version>3.5.8</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.canse</groupId>
-	<artifactId>domestic-task-api</artifactId>
+    <groupId>com.canse</groupId>
+    <artifactId>slavery-home-challenge-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>domestic-task-api</name>
-	<description>Application on the planning of domestic slaves</description>
+    <name>slavery-home-challenge-api</name>
+	<description>Backend of the competitive domestic slavery application</description>
 	<url/>
 	<licenses>
 		<license/>
