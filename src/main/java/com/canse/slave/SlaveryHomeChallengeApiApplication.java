@@ -7,7 +7,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class DomesticTaskApiApplication {
+public class SlaveryHomeChallengeApiApplication {
 
 
     @Autowired
@@ -15,7 +15,7 @@ public class DomesticTaskApiApplication {
 
 
     public static void main(String[] args) {
-        SpringApplication.run(DomesticTaskApiApplication.class, args);
+        SpringApplication.run(SlaveryHomeChallengeApiApplication.class, args);
     }
 
 
