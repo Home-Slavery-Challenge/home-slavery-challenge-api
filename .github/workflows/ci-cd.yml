@@ -83,8 +83,8 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
-          source: "deploy/docker-compose.yml"
-          target: "/srv/slavery-home-challenge-api/docker-compose.yml"
+          source: "deploy/docker-compose.prod.yml"
+          target: "/srv/slavery-home-challenge-api/docker-compose.prod.yml"
 
       - name: Deploy on server
         uses: appleboy/ssh-action@v1.0.0
