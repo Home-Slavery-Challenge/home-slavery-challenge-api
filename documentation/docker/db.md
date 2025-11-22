@@ -54,6 +54,8 @@ services:
       - .env
     environment:
       DB_HOST: db  # 👈 
+      DATASOURCE_USERNAME: ${MYSQL_USER} # 👀🔎
+      DATASOURCE_PASSWORD: ${MYSQL_PASSWORD} # 👀🔎
 ```
 
 ---
@@ -82,4 +84,35 @@ En prod :
 | Local (sans Docker) | `DB_HOST=localhost`                  | `.env`                |
 | Local Docker        | `DB_HOST=db`                         | override dans compose |
 | Production          | adapté au setup (`db`, IP, hostname) | `.env` prod           |
+
+
+
+---
+
+### 👀🔎 Note — Pourquoi Spring ne se connectait pas à MySQL en Docker ?
+
+Le problème ne venait **pas** d'une interdiction d'utiliser `root`.
+Le problème venait simplement du fait que :
+
+* **MySQL Docker** utilisait
+  `MYSQL_USER=slaveapp` / `MYSQL_PASSWORD=slavepass`
+* **Spring Boot**, lui, utilisait
+  `DATASOURCE_USERNAME=root` / `DATASOURCE_PASSWORD=Rootoorn`
+
+➡ Résultat : Spring tentait de se connecter avec **de mauvais identifiants**, d’où l’erreur *"Access denied / Communications link failure"*.
+
+**Solution :**
+Dans `docker-compose.yml`, on mappe les identifiants MySQL vers ceux de Spring :
+
+```yaml
+environment:
+  DATASOURCE_USERNAME: ${MYSQL_USER}
+  DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+```
+
+Ainsi :
+
+* Spring utilise toujours le bon utilisateur dans Docker
+* Le mode local reste indépendant
+* Plus aucun conflit entre `.env` et MySQL du container
 
