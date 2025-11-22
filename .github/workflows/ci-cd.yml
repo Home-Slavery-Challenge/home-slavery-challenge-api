@@ -77,14 +77,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Upload docker-compose.yml to server
+      - name: Upload docker-compose.prod.yml to server
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASSWORD }}
+          password: ${{ secrets.SSH_PASSWORD }} # ou key si tu utilises une clé
           source: "deploy/docker-compose.prod.yml"
-          target: "/srv/slavery-home-challenge-api/docker-compose.prod.yml"
+          target: "/srv/slavery-home-challenge-api"
+          overwrite: true
+          strip_components: 1
 
       - name: Deploy on server
         uses: appleboy/ssh-action@v1.0.0
