@@ -64,3 +64,41 @@ jobs:
           tags: |
             cansefr/slavery-home-challenge-api:latest
             cansefr/slavery-home-challenge-api:${{ github.sha }}
+
+  # ==========================
+  # 🚀 Déploiement sur le serveur
+  # ==========================
+  deploy-to-server:
+    if: github.ref == 'refs/heads/main'
+    needs: docker-build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Upload docker-compose.yml to server
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          source: "deploy/docker-compose.yml"
+          target: "/srv/slavery-home-challenge-api/docker-compose.yml"
+
+      - name: Deploy on server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            set -e
+  
+            cd /srv/slavery-home-challenge-api
+  
+            echo "Pulling latest images..."
+            docker compose pull
+  
+            echo "Restarting containers..."
+            docker compose up -d --remove-orphans
