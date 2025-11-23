@@ -9,6 +9,9 @@ classDiagram
     User "1" -- "0..*" VerificationToken: tokens
     User "1" -- "0..*" Role: roles
 
+    User "1" -- "0..*" Friendship: sentFriendships
+    User "1" -- "0..*" Friendship: receivedFriendships
+
 %% ========================
 %% Relations challenge
 %% ========================
@@ -31,7 +34,7 @@ classDiagram
 %% ========================
 
 class User{
-Long id
+    Long id
     String username
     String password
     Boolean enabled
@@ -39,6 +42,17 @@ Long id
     List<Role> roles
     List<VerificationToken> tokens
 }
+
+class Friendship{
+    Long id
+    User requester 
+    User receiver  
+    FriendshipStatus status
+    Date createdAt
+    Date updatedAt
+}
+
+
 
 class Role{
     Long id
@@ -113,3 +127,10 @@ class Reward{
 
 
 ```
+
+enum FriendshipStatus{
+PENDING
+ACCEPTED
+DECLINED
+BLOCKED
+}
