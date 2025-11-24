@@ -17,7 +17,7 @@ Un utilisateur authentifié peut :
 
         * `rewardIsRandom`
         * `rewardIsRecurring`
-    * Ajouter les **participants** (y compris lui-même).
+    * Ajouter les **participants** (de son groupe de friendship y compris lui-même).
 
 3. **Pendant le mois : jouer**
 
@@ -202,7 +202,8 @@ sequenceDiagram
 
     CPS ->> TES: getEntriesForPeriod(periodId)
     TES ->> DB: SELECT TaskEntry JOIN ChallengeDay<br/>WHERE period_id = ?
-    DB -->> TES: Liste&lt; TaskEntry&gt
+    DB -->> TES: Liste&lt
+%%    ; TaskEntry&gt
     TES -->> CPS: Entries de la période
 
     Note over CPS: 2. Calcul du score par joueur
@@ -243,8 +244,6 @@ Plus tard, quand la récompense est réellement donnée :
 ---
 
 ## 5️⃣ Comment t’en servir concrètement pour le dev
-
-Tu peux t’en servir comme **checklist**.
 
 ### Étape 1 – Création de challenge
 

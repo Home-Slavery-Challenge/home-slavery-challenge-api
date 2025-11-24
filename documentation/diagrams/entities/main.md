@@ -52,8 +52,6 @@ class Friendship{
     Date updatedAt
 }
 
-
-
 class Role{
     Long id
     String name
