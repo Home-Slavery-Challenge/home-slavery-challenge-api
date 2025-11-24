@@ -47,6 +47,7 @@ class Friendship{
     Long id
     User requester 
     User receiver  
+    Boolean isChecked
     FriendshipStatus status
     Date createdAt
     Date updatedAt
