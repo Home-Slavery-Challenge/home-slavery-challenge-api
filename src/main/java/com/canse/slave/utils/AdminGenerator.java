@@ -17,11 +17,11 @@ public class AdminGenerator {
     @Autowired
     private EnvConfig envConfig;
 
-    public void seedRolesAndAdmin(){
+    public void seedRolesAndAdmin() {
         List<Role> userRole = userService.getRoles();
-        if(userRole.isEmpty()){
-            userService.addRole(new Role(null, "ADMIN"));
-            userService.addRole(new Role(null, "USER"));
+        if (userRole.isEmpty()) {
+            userService.addRole(new Role("ADMIN"));
+            userService.addRole(new Role("USER"));
             User admin = User.builder()
                     .username(envConfig.getAdminUsername())
                     .email(envConfig.getAdminEmail())
@@ -32,7 +32,7 @@ public class AdminGenerator {
             userService.saveUser(admin);
 
             userService.addRoleToUser(envConfig.getAdminUsername(), "ADMIN");
-        }else {
+        } else {
             System.out.println("-------------------------------");
             System.out.println("| Admin and roles already exist |");
             System.out.println("-------------------------------");
