@@ -2,13 +2,17 @@ package com.canse.slave.services;
 
 import com.canse.slave.entities.Friendship;
 import com.canse.slave.entities.User;
+import com.canse.slave.enums.FriendshipStatus;
+import com.canse.slave.repos.FriendshipRepository;
 import com.canse.slave.repos.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+
+// TODO : Creer des DTO
 
 @Transactional
 @Service
@@ -17,56 +21,70 @@ public class FriendshipServiceImpl implements FriendshipService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private FriendshipRepository friendshipRepository;
+
     @Override
     public List<User> searchUsersByName(String query, String currentUser) {
-//        Use DTO and get only field necessary
         return userRepository.findByUsernameContainsIgnoreCase(query).stream()
                 .filter(u -> !u.getUsername().equals(currentUser))
                 .toList();
     }
 
     @Override
-    public Friendship sendFriendRequest(UserDetails currentUser, Long targetUserId) {
+    public Friendship sendFriendRequest(String currentUser, Long targetUserId) {
+
+        User userRequester = userRepository.findByUsername(currentUser);
+        User userReceiver = userRepository.findById(targetUserId).get();
+
+        Friendship friendship = new Friendship();
+        friendship.setRequester(userRequester);
+        friendship.setReceiver(userReceiver);
+        friendship.setChecked(false);
+        friendship.setStatus(FriendshipStatus.PENDING);
+        return friendshipRepository.save(friendship);
+    }
+
+    @Override
+    public Friendship acceptRequest(String currentUser, Long friendshipId) {
         return null;
     }
 
     @Override
-    public Friendship acceptRequest(UserDetails currentUser, Long friendshipId) {
+    public Friendship declineRequest(String currentUser, Long friendshipId) {
         return null;
     }
 
     @Override
-    public Friendship declineRequest(UserDetails currentUser, Long friendshipId) {
+    public Friendship blockUser(String currentUser, Long targetUserId) {
         return null;
     }
 
     @Override
-    public Friendship blockUser(UserDetails currentUser, Long targetUserId) {
-        return null;
+    public List<Friendship> getPendingReceivedRequests(String currentUser) {
+        return friendshipRepository.getPendingReceivedRequestsByUser(currentUser);
+    }
+
+
+    @Override
+    public List<Friendship> getPendingSentRequests(String currentUser) {
+        return friendshipRepository.getPendingSentRequests(currentUser);
     }
 
     @Override
-    public List<Friendship> getPendingReceivedRequests(UserDetails currentUser) {
-        return List.of();
+    public Friendship markAsChecked(Long friendshipId) {
+        Friendship friendship = friendshipRepository.findById(friendshipId).get();
+        friendship.setChecked(true);
+        return friendshipRepository.save(friendship);
     }
 
     @Override
-    public List<Friendship> getPendingSentRequests(UserDetails currentUser) {
-        return List.of();
+    public List<User> getFriends(String currentUser) {
+        return friendshipRepository.findFriendsOfUser(currentUser);
     }
 
     @Override
-    public Friendship markAsChecked(UserDetails currentUser, Long friendshipId) {
-        return null;
-    }
-
-    @Override
-    public List<User> getFriends(UserDetails currentUser) {
-        return List.of();
-    }
-
-    @Override
-    public void removeFriend(UserDetails currentUser, Long friendId) {
+    public void removeFriend(String currentUser, Long friendId) {
 
     }
 }

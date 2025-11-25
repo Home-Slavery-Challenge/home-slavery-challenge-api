@@ -18,9 +18,34 @@ public class FriendshipRestController {
     @Autowired
     FriendshipService friendshipService;
 
-    @GetMapping("/{query}")
+    @GetMapping("/search-by-name/{query}")
     public List<User>  getUsersByName(@PathVariable String query,@AuthenticationPrincipal String currentUsername){
         return friendshipService.searchUsersByName(query, currentUsername);
+    }
+
+    @PostMapping("/create/{targetId}")
+    public Friendship createFriendship(@PathVariable Long targetId,@AuthenticationPrincipal String currentUsername){
+        return friendshipService.sendFriendRequest(currentUsername, targetId);
+    }
+
+    @GetMapping("/pending-received")
+    public List<Friendship> getPendingReceived(@AuthenticationPrincipal String currentUsername){
+        return friendshipService.getPendingReceivedRequests(currentUsername);
+    }
+
+    @GetMapping("/pending-sent")
+    public List<Friendship> getPendingSent(@AuthenticationPrincipal String currentUsername){
+        return friendshipService.getPendingSentRequests(currentUsername);
+    }
+
+    @PostMapping("/check/{friendshipId}")
+    public Friendship getPendingSent(@PathVariable Long friendshipId){
+        return friendshipService.markAsChecked(friendshipId);
+    }
+
+    @GetMapping("/friends")
+    public List<User> getFriends(@AuthenticationPrincipal String currentUsername){
+        return friendshipService.getFriends(currentUsername);
     }
 
 }

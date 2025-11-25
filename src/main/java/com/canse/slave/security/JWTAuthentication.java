@@ -48,6 +48,7 @@ public class JWTAuthentication extends UsernamePasswordAuthenticationFilter {
         List<String> roles = new ArrayList<>();
         user.getAuthorities().forEach(auth -> roles.add(auth.getAuthority()));
 
+//        TODO : Ajouter le user id pour recuperer l'id du requester et ameliorer les service, sans avoir a getuser by username
         String jwt = JWT
                 .create()
                 .withSubject(user.getUsername())

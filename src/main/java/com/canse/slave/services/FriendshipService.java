@@ -2,8 +2,6 @@ package com.canse.slave.services;
 
 import com.canse.slave.entities.Friendship;
 import com.canse.slave.entities.User;
-import com.canse.slave.enums.FriendshipStatus;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 
@@ -11,18 +9,21 @@ public interface FriendshipService {
 
     List<User> searchUsersByName(String query, String currentUser);
 
-    Friendship sendFriendRequest(UserDetails currentUser, Long targetUserId);
+    Friendship sendFriendRequest(String currentUser, Long targetUserId);
 
-    Friendship acceptRequest(UserDetails currentUser, Long friendshipId);
-    Friendship declineRequest(UserDetails currentUser, Long friendshipId);
-    Friendship blockUser(UserDetails currentUser, Long targetUserId);
+    Friendship acceptRequest(String currentUser, Long friendshipId);
 
-    List<Friendship> getPendingReceivedRequests(UserDetails currentUser);
-    List<Friendship> getPendingSentRequests(UserDetails currentUser);
+    Friendship declineRequest(String currentUser, Long friendshipId);
 
-    Friendship markAsChecked(UserDetails currentUser, Long friendshipId);
+    Friendship blockUser(String currentUser, Long targetUserId);
 
-    List<User> getFriends(UserDetails currentUser);
+    List<Friendship> getPendingReceivedRequests(String currentUser);
 
-    void removeFriend(UserDetails currentUser, Long friendId);
+    List<Friendship> getPendingSentRequests(String currentUser);
+
+    Friendship markAsChecked(Long friendshipId);
+
+    List<User> getFriends(String currentUser);
+
+    void removeFriend(String currentUser, Long friendId);
 }
