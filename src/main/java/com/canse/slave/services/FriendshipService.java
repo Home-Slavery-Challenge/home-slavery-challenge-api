@@ -11,11 +11,15 @@ public interface FriendshipService {
 
     Friendship sendFriendRequest(String currentUser, Long targetUserId);
 
-    Friendship acceptRequest( Long friendshipId);
+    Friendship acceptAndNormalizeFriendship(String currentUser, Long otherUserId);
 
     void declineRequest(Long friendshipId);
 
-    Friendship blockUser( Long friendshipId);
+    Friendship blockUser(Long friendshipId, String currentUser);
+
+    void blockFriendship(Long friendshipId, String currentUser);
+
+    void unblockUser(Long friendshipId);
 
     List<Friendship> getPendingReceivedRequests(String currentUser);
 
@@ -25,5 +29,7 @@ public interface FriendshipService {
 
     List<User> getFriends(String currentUser);
 
-    void removeFriend(Long friendshipId) ;
+    List<User> getBlocked(String currentUser);
+
+    void removeFriend(Long friendshipId);
 }

@@ -10,17 +10,58 @@ import java.util.List;
 
 public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
     @Query("SELECT f FROM Friendship f WHERE  f.status = 'PENDING' AND f.receiver.username = :currentUser")
-    List<Friendship> getPendingReceivedRequestsByUser(@Param("currentUser") String currentUser);
-
-    @Query("SELECT f FROM Friendship f WHERE f.isChecked = FALSE AND f.requester.username = :currentUser")
-    List<Friendship> getPendingSentRequests(@Param("currentUser") String currentUser);
+    List<Friendship> getPendingsReceivedRequestsByUser(@Param("currentUser") String currentUser);
 
     @Query("""
-                SELECT f.receiver
-                FROM Friendship f
-                WHERE f.status = 'ACCEPTED'
-                  AND f.requester.username = :currentUser
+            SELECT f FROM Friendship f
+            WHERE f.status = 'PENDING'
+              AND f.requester.username = :currentUser
             """)
-    List<User> findFriendsOfUser(@Param("currentUser") String currentUser);
+    List<Friendship> getPendingsSentRequests(@Param("currentUser") String currentUser);
+
+    @Query("""
+            SELECT f.receiver
+            FROM Friendship f
+            WHERE f.status = :status
+              AND f.requester.username = :currentUser
+            """)
+    List<User> findFriendsOfUser(@Param("currentUser") String currentUser, @Param("status") String status);
+
+    @Query("""
+            SELECT f FROM Friendship f
+            WHERE f.requester.id = :requesterId
+              AND f.receiver.id = :receiverId
+            """)
+    Friendship getAlreadyExistsFriendship(@Param("requesterId") Long requesterId, @Param("receiverId") Long receiverId);
+
+    @Query("""
+                SELECT f FROM Friendship f
+                WHERE (f.requester.id = :userId1 AND f.receiver.id = :userId2)
+                   OR (f.requester.id = :userId2 AND f.receiver.id = :userId1)
+                ORDER BY f.createdAt DESC
+            """)
+    List<Friendship> findAllFriendshipsBetween(@Param("userId1") Long userId1, @Param("userId2") Long userId2);
+
+    Friendship findByReceiverId(Long userId);
+
+    @Query("""
+            SELECT CASE
+                     WHEN f.requester.username = :currentUser THEN f.receiver
+                     ELSE f.requester
+                   END
+            FROM Friendship f
+            WHERE f.status = 'ACCEPTED'
+              AND (f.requester.username = :currentUser OR f.receiver.username = :currentUser)
+            """)
+    List<User> findAcceptedFriendsOfUser(@Param("currentUser") String currentUser);
+
+
+    @Query("""
+            SELECT f.requester
+            FROM Friendship f
+            WHERE f.status = 'BLOCKED'
+              AND f.receiver.username = :currentUser
+            """)
+    List<User> findBlockedUsersOf(@Param("currentUser") String currentUser);
 
 }
