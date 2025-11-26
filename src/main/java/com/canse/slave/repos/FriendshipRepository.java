@@ -12,7 +12,6 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
     @Query("SELECT f FROM Friendship f WHERE  f.status = 'PENDING' AND f.receiver.username = :currentUser")
     List<Friendship> getPendingReceivedRequestsByUser(@Param("currentUser") String currentUser);
 
-    @Query("SELECT f FROM Friendship f WHERE f.isChecked = FALSE AND f.requester.username = :currentUser")
     List<Friendship> getPendingSentRequests(@Param("currentUser") String currentUser);
 
     @Query("""

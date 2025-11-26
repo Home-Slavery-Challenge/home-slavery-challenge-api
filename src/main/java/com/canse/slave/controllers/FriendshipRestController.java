@@ -28,6 +28,21 @@ public class FriendshipRestController {
         return friendshipService.sendFriendRequest(currentUsername, targetId);
     }
 
+    @PostMapping("/accept/{friendshipId}")
+    public Friendship acceptFriendship(@PathVariable Long friendshipId){
+        return friendshipService.acceptRequest(friendshipId);
+    }
+
+    @PostMapping("/accept/{friendshipId}")
+    public void declineFriendshipRequest(@PathVariable Long friendshipId){
+        friendshipService.declineRequest(friendshipId);
+    }
+
+    @PostMapping("/block/{friendshipId}")
+    public Friendship blockFriendship(@PathVariable Long friendshipId){
+        return friendshipService.blockUser(friendshipId);
+    }
+
     @GetMapping("/pending-received")
     public List<Friendship> getPendingReceived(@AuthenticationPrincipal String currentUsername){
         return friendshipService.getPendingReceivedRequests(currentUsername);
@@ -47,5 +62,12 @@ public class FriendshipRestController {
     public List<User> getFriends(@AuthenticationPrincipal String currentUsername){
         return friendshipService.getFriends(currentUsername);
     }
+
+    @DeleteMapping("{friendshipId}")
+    public void deleteFriendship(@PathVariable Long friendshipId){
+        friendshipService.removeFriend(friendshipId);
+    }
+
+
 
 }

@@ -11,11 +11,11 @@ public interface FriendshipService {
 
     Friendship sendFriendRequest(String currentUser, Long targetUserId);
 
-    Friendship acceptRequest(String currentUser, Long friendshipId);
+    Friendship acceptRequest( Long friendshipId);
 
-    Friendship declineRequest(String currentUser, Long friendshipId);
+    void declineRequest(Long friendshipId);
 
-    Friendship blockUser(String currentUser, Long targetUserId);
+    Friendship blockUser( Long friendshipId);
 
     List<Friendship> getPendingReceivedRequests(String currentUser);
 
@@ -25,5 +25,5 @@ public interface FriendshipService {
 
     List<User> getFriends(String currentUser);
 
-    void removeFriend(String currentUser, Long friendId);
+    void removeFriend(Long friendshipId) ;
 }

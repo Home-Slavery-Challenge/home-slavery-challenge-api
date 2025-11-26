@@ -46,18 +46,24 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     @Override
-    public Friendship acceptRequest(String currentUser, Long friendshipId) {
-        return null;
+    public Friendship acceptRequest(Long friendshipId) {
+        Friendship friendship = friendshipRepository.findById(friendshipId).get();
+        friendship.setStatus(FriendshipStatus.ACCEPTED);
+        friendship.setChecked(true);
+        return friendshipRepository.save(friendship);
     }
 
     @Override
-    public Friendship declineRequest(String currentUser, Long friendshipId) {
-        return null;
+    public void declineRequest(Long friendshipId) {
+        friendshipRepository.deleteById(friendshipId);
     }
 
     @Override
-    public Friendship blockUser(String currentUser, Long targetUserId) {
-        return null;
+    public Friendship blockUser(Long friendshipId) {
+        Friendship friendship = friendshipRepository.findById(friendshipId).get();
+        friendship.setStatus(FriendshipStatus.BLOCKED);
+        friendship.setChecked(true);
+        return friendshipRepository.save(friendship);
     }
 
     @Override
@@ -84,7 +90,8 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     @Override
-    public void removeFriend(String currentUser, Long friendId) {
-
+    public void removeFriend(Long friendshipId) {
+        Friendship friendship = friendshipRepository.findById(friendshipId).get();
+        friendshipRepository.deleteById(friendshipId);
     }
 }
