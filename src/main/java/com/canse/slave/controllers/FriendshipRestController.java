@@ -33,7 +33,7 @@ public class FriendshipRestController {
         return friendshipService.acceptRequest(friendshipId);
     }
 
-    @PostMapping("/accept/{friendshipId}")
+    @PostMapping("/decline/{friendshipId}")
     public void declineFriendshipRequest(@PathVariable Long friendshipId){
         friendshipService.declineRequest(friendshipId);
     }

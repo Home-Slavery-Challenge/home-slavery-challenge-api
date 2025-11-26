@@ -24,6 +24,11 @@ public class FriendshipServiceImpl implements FriendshipService {
     @Autowired
     private FriendshipRepository friendshipRepository;
 
+    private Friendship getFriendshipOrThrow(Long friendshipId) {
+        return friendshipRepository.findById(friendshipId)
+                .orElseThrow(() -> new IllegalArgumentException("Friendship not found: " + friendshipId));
+    }
+
     @Override
     public List<User> searchUsersByName(String query, String currentUser) {
         return userRepository.findByUsernameContainsIgnoreCase(query).stream()
@@ -47,7 +52,7 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     @Override
     public Friendship acceptRequest(Long friendshipId) {
-        Friendship friendship = friendshipRepository.findById(friendshipId).get();
+        Friendship friendship = getFriendshipOrThrow(friendshipId);
         friendship.setStatus(FriendshipStatus.ACCEPTED);
         friendship.setChecked(true);
         return friendshipRepository.save(friendship);
@@ -60,7 +65,7 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     @Override
     public Friendship blockUser(Long friendshipId) {
-        Friendship friendship = friendshipRepository.findById(friendshipId).get();
+        Friendship friendship = getFriendshipOrThrow(friendshipId);
         friendship.setStatus(FriendshipStatus.BLOCKED);
         friendship.setChecked(true);
         return friendshipRepository.save(friendship);
@@ -79,7 +84,7 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     @Override
     public Friendship markAsChecked(Long friendshipId) {
-        Friendship friendship = friendshipRepository.findById(friendshipId).get();
+        Friendship friendship = getFriendshipOrThrow(friendshipId);
         friendship.setChecked(true);
         return friendshipRepository.save(friendship);
     }
@@ -91,7 +96,6 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     @Override
     public void removeFriend(Long friendshipId) {
-        Friendship friendship = friendshipRepository.findById(friendshipId).get();
         friendshipRepository.deleteById(friendshipId);
     }
 }
