@@ -42,18 +42,15 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
             """)
     List<Friendship> findAllFriendshipsBetween(@Param("userId1") Long userId1, @Param("userId2") Long userId2);
 
+
     Friendship findByReceiverId(Long userId);
 
     @Query("""
-            SELECT CASE
-                     WHEN f.requester.username = :currentUser THEN f.receiver
-                     ELSE f.requester
-                   END
-            FROM Friendship f
-            WHERE f.status = 'ACCEPTED'
-              AND (f.requester.username = :currentUser OR f.receiver.username = :currentUser)
-            """)
-    List<User> findAcceptedFriendsOfUser(@Param("currentUser") String currentUser);
+    SELECT f FROM Friendship f
+    WHERE f.status = 'ACCEPTED'
+      AND (f.requester.username = :currentUser OR f.receiver.username = :currentUser)
+    """)
+    List<Friendship> findAcceptedFriendshipsOfUser(@Param("currentUser") String currentUser);
 
 
     @Query("""

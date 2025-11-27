@@ -38,12 +38,12 @@ public class FriendshipRestController {
     }
 
     @PostMapping("/block-user/{friendshipId}")
-    public Friendship blockFriendship(@PathVariable Long friendshipId, @AuthenticationPrincipal String currentUser) {
+    public Friendship unblockUser(@PathVariable Long friendshipId, @AuthenticationPrincipal String currentUser) {
         return friendshipService.blockUser(friendshipId, currentUser);
     }
 
     @PostMapping("/block-friendship/{friendshipId}")
-    public void unblockUser(@PathVariable Long friendshipId, @AuthenticationPrincipal String currentUser) {
+    public void blockFriendship(@PathVariable Long friendshipId, @AuthenticationPrincipal String currentUser) {
         friendshipService.blockFriendship(friendshipId, currentUser);
     }
 

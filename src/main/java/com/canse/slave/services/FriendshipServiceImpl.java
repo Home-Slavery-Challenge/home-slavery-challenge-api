@@ -13,6 +13,11 @@ import java.util.List;
 
 // TODO : Créer des DTO pour exposer les données au front
 
+/*
+* Requester -> Maitre de la relation
+* */
+
+
 @Transactional
 @Service
 public class FriendshipServiceImpl implements FriendshipService {
@@ -136,11 +141,9 @@ public class FriendshipServiceImpl implements FriendshipService {
         Long userA = friendship.getRequester().getId();
         Long userB = friendship.getReceiver().getId();
 
-        // Récupère A→B et B→A
         List<Friendship> allRelations =
                 friendshipRepository.findAllFriendshipsBetween(userA, userB);
 
-        // Supprime toutes les relations entre ces deux utilisateurs
         friendshipRepository.deleteAll(allRelations);
     }
 
@@ -149,8 +152,8 @@ public class FriendshipServiceImpl implements FriendshipService {
      * par exemple depuis une recherche de contacts.
      * <p>
      * Règle métier pour BLOCKED :
-     * - requester = utilisateur bloqué
-     * - receiver  = utilisateur qui bloque
+     * - requester = utilisateur qui bloque bloqué
+     * - receiver  = utilisateur
      * <p>
      * Aucun lien d'amitié préalable n'est nécessaire.
      */
@@ -166,8 +169,8 @@ public class FriendshipServiceImpl implements FriendshipService {
                 .orElseThrow(() -> new IllegalArgumentException("User to block not found: " + userIdToBlock));
 
         Friendship friendship = new Friendship();
-        friendship.setRequester(blocked);
-        friendship.setReceiver(blocker);
+        friendship.setRequester(blocker);
+        friendship.setReceiver(blocked);
         friendship.setChecked(true);
         friendship.setStatus(FriendshipStatus.BLOCKED);
 
@@ -175,11 +178,9 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     /**
-     * Méthode historique utilisée pour gérer un blocage à partir d'une relation.
+     * Utilisée pour gérer un blocage à partir d'une relation peut importe le status et son nombre d'entré en BDD
      * <p>
-     * Actuellement, cette méthode supprime uniquement les relations entre deux utilisateurs
-     * (doublon PENDING A→B / B→A ou relation unique), sans créer d'entrée BLOCKED.
-     * La logique métier de blocage est désormais gérée par {@link #blockUser(Long, String)}.
+     * Gere les doublons PENDING A→B / B→A ou relation unique,
      *
      * @param friendshipId identifiant de la relation
      * @param currentUser  username de l'utilisateur courant
@@ -190,25 +191,35 @@ public class FriendshipServiceImpl implements FriendshipService {
         Friendship friendship = friendshipRepository.findById(friendshipId)
                 .orElseThrow(() -> new RuntimeException("Friendship not found"));
 
-        User a = friendship.getRequester();
-        User b = friendship.getReceiver();
+        User requester;
+        User blockedUser;
+
+        if (friendship.getRequester().getUsername().equals(currentUser)) {
+            requester = friendship.getRequester();
+            blockedUser = friendship.getReceiver();
+        } else if (friendship.getReceiver().getUsername().equals(currentUser)) {
+            requester = friendship.getReceiver();
+            blockedUser = friendship.getRequester();
+        } else {
+            throw new RuntimeException("Current user is not part of this friendship");
+        }
 
         List<Friendship> friendshipList =
-                friendshipRepository.findAllFriendshipsBetween(a.getId(), b.getId());
+                friendshipRepository.findAllFriendshipsBetween(requester.getId(), blockedUser.getId());
 
-        if (friendshipList.size() > 1) {
-            Friendship friendshipA = friendshipRepository.findByReceiverId(a.getId());
-            Friendship friendshipB = friendshipRepository.findByReceiverId(b.getId());
-
-            if (friendshipA != null) {
-                friendshipRepository.delete(friendshipA);
-            }
-            if (friendshipB != null) {
-                friendshipRepository.delete(friendshipB);
-            }
+        if (!friendshipList.isEmpty()) {
+            friendshipRepository.deleteAll(friendshipList);
         } else {
-            friendshipRepository.deleteById(friendshipId);
+            friendshipRepository.delete(friendship);
         }
+
+        Friendship newFriendship = new Friendship();
+        newFriendship.setRequester(requester);
+        newFriendship.setReceiver(blockedUser);
+        newFriendship.setChecked(true);
+        newFriendship.setStatus(FriendshipStatus.BLOCKED);
+
+        friendshipRepository.save(newFriendship);
     }
 
     /**
@@ -226,7 +237,7 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     /**
-     * Récupère la liste des demandes d'amitié reçues et encore en attente (PENDING).
+     * Récupère la liste des demandes d'amitié reçues de l'utilisateur courant ayant le status PENDING.
      *
      * @param currentUser username de l'utilisateur courant
      * @return liste des demandes reçues en attente
@@ -238,7 +249,7 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     /**
      * Récupère la liste des demandes d'amitié envoyées par l'utilisateur
-     * et encore en attente (PENDING).
+     * courant ayant le statut PENDING.
      *
      * @param currentUser username de l'utilisateur courant
      * @return liste des demandes envoyées en attente
@@ -250,7 +261,7 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     /**
      * Marque une demande d'amitié comme "vue" (checked = true),
-     * par exemple pour faire disparaître un badge de notification dans l'interface.
+     * permet de faire disparaître un badge de notification dans l'interface.
      *
      * @param friendshipId identifiant de la relation à marquer comme vue
      * @return la relation mise à jour
@@ -263,23 +274,31 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     /**
-     * Récupère la liste des amis de l'utilisateur courant, c'est-à-dire
-     * toutes les relations ACCEPTED où il est soit requester, soit receiver.
+     * Récupère la liste des amis de l'utilisateur courant,
+     * toutes les relations ACCEPTED où il est requester/receiver.
      *
      * @param currentUser username de l'utilisateur courant
      * @return liste des utilisateurs amis
      */
     @Override
     public List<User> getFriends(String currentUser) {
-        return friendshipRepository.findAcceptedFriendsOfUser(currentUser);
+        List<Friendship> friendships =
+                friendshipRepository.findAcceptedFriendshipsOfUser(currentUser);
+
+        return friendships.stream()
+                .map(f -> f.getRequester().getUsername().equals(currentUser)
+                        ? f.getReceiver()
+                        : f.getRequester())
+                .distinct() // au cas où
+                .toList();
     }
 
     /**
-     * Récupère la liste des utilisateurs bloqués par l'utilisateur courant.
+     * Récupère liste utilisateurs bloqués par l'utilisateur courant.
      * <p>
-     * Rappel de la convention :
-     * - requester = utilisateur bloqué
-     * - receiver  = utilisateur qui bloque
+     * Convention :
+     * - receiver = utilisateur bloqué
+     * - requester  = utilisateur qui bloque
      *
      * @param currentUser username de l'utilisateur courant
      * @return liste des utilisateurs bloqués
