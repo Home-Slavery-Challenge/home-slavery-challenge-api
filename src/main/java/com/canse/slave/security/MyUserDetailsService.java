@@ -1,6 +1,6 @@
 package com.canse.slave.security;
 
-import com.canse.slave.entities.User;
+import com.canse.slave.entities.Users;
 import com.canse.slave.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -21,7 +21,7 @@ public class MyUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userService.findUserByUsername(username);
+        Users user = userService.findUserByUsername(username);
         if (user == null) {
             throw new UsernameNotFoundException("User " + username + " undefined !");
         }

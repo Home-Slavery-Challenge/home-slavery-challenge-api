@@ -2,7 +2,7 @@ package com.canse.slave.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.canse.slave.entities.User;
+import com.canse.slave.entities.Users;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -30,10 +30,10 @@ public class JWTAuthentication extends UsernamePasswordAuthenticationFilter {
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-        User user = null;
+        Users user = null;
 
         try {
-            user = new ObjectMapper().readValue(request.getInputStream(), User.class);
+            user = new ObjectMapper().readValue(request.getInputStream(), Users.class);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

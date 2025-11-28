@@ -1,7 +1,7 @@
 package com.canse.slave.services;
 
 import com.canse.slave.entities.Friendship;
-import com.canse.slave.entities.User;
+import com.canse.slave.entities.Users;
 import com.canse.slave.enums.FriendshipStatus;
 import com.canse.slave.repos.FriendshipRepository;
 import com.canse.slave.repos.UserRepository;
@@ -45,7 +45,7 @@ public class FriendshipServiceImpl implements FriendshipService {
      * @return liste des utilisateurs correspondant à la recherche, sans inclure currentUser
      */
     @Override
-    public List<User> searchUsersByName(String query, String currentUser) {
+    public List<Users> searchUsersByName(String query, String currentUser) {
         return userRepository.findByUsernameContainsIgnoreCase(query).stream()
                 .filter(u -> !u.getUsername().equals(currentUser))
                 .toList();
@@ -64,12 +64,12 @@ public class FriendshipServiceImpl implements FriendshipService {
     @Override
     public Friendship sendFriendRequest(String currentUser, Long targetUserId) {
 
-        User userRequester = userRepository.findByUsername(currentUser);
+        Users userRequester = userRepository.findByUsername(currentUser);
         if (userRequester == null) {
             throw new IllegalArgumentException("User not found: " + currentUser);
         }
 
-        User userReceiver = userRepository.findById(targetUserId)
+        Users userReceiver = userRepository.findById(targetUserId)
                 .orElseThrow(() -> new IllegalArgumentException("Target user not found: " + targetUserId));
 
         Friendship friendshipAlreadyExist =
@@ -104,8 +104,8 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         Friendship friendship = getFriendshipOrThrow(friendshipId);
 
-        User userA = friendship.getRequester();
-        User userB = friendship.getReceiver();
+        Users userA = friendship.getRequester();
+        Users userB = friendship.getReceiver();
 
         List<Friendship> friendships =
                 friendshipRepository.findAllFriendshipsBetween(userA.getId(), userB.getId());
@@ -160,12 +160,12 @@ public class FriendshipServiceImpl implements FriendshipService {
     @Override
     public Friendship blockUser(Long userIdToBlock, String currentUser) {
 
-        User blocker = userRepository.findByUsername(currentUser);
+        Users blocker = userRepository.findByUsername(currentUser);
         if (blocker == null) {
             throw new IllegalArgumentException("Current user not found: " + currentUser);
         }
 
-        User blocked = userRepository.findById(userIdToBlock)
+        Users blocked = userRepository.findById(userIdToBlock)
                 .orElseThrow(() -> new IllegalArgumentException("User to block not found: " + userIdToBlock));
 
         Friendship friendship = new Friendship();
@@ -191,8 +191,8 @@ public class FriendshipServiceImpl implements FriendshipService {
         Friendship friendship = friendshipRepository.findById(friendshipId)
                 .orElseThrow(() -> new RuntimeException("Friendship not found"));
 
-        User requester;
-        User blockedUser;
+        Users requester;
+        Users blockedUser;
 
         if (friendship.getRequester().getUsername().equals(currentUser)) {
             requester = friendship.getRequester();
@@ -281,7 +281,7 @@ public class FriendshipServiceImpl implements FriendshipService {
      * @return liste des utilisateurs amis
      */
     @Override
-    public List<User> getFriends(String currentUser) {
+    public List<Users> getFriends(String currentUser) {
         List<Friendship> friendships =
                 friendshipRepository.findAcceptedFriendshipsOfUser(currentUser);
 
@@ -304,7 +304,7 @@ public class FriendshipServiceImpl implements FriendshipService {
      * @return liste des utilisateurs bloqués
      */
     @Override
-    public List<User> getBlocked(String currentUser) {
+    public List<Users> getBlocked(String currentUser) {
         return friendshipRepository.findBlockedUsersOf(currentUser);
     }
 

@@ -1,7 +1,7 @@
 package com.canse.slave.repos;
 
 import com.canse.slave.entities.Friendship;
-import com.canse.slave.entities.User;
+import com.canse.slave.entities.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,7 +25,7 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
             WHERE f.status = :status
               AND f.requester.username = :currentUser
             """)
-    List<User> findFriendsOfUser(@Param("currentUser") String currentUser, @Param("status") String status);
+    List<Users> findFriendsOfUser(@Param("currentUser") String currentUser, @Param("status") String status);
 
     @Query("""
             SELECT f FROM Friendship f
@@ -59,6 +59,6 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
             WHERE f.status = 'BLOCKED'
               AND f.receiver.username = :currentUser
             """)
-    List<User> findBlockedUsersOf(@Param("currentUser") String currentUser);
+    List<Users> findBlockedUsersOf(@Param("currentUser") String currentUser);
 
 }

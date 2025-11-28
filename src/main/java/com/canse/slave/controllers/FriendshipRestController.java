@@ -1,7 +1,7 @@
 package com.canse.slave.controllers;
 
 import com.canse.slave.entities.Friendship;
-import com.canse.slave.entities.User;
+import com.canse.slave.entities.Users;
 import com.canse.slave.services.FriendshipService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,7 +18,7 @@ public class FriendshipRestController {
     FriendshipService friendshipService;
 
     @GetMapping("/search-by-name/{query}")
-    public List<User> getUsersByName(@PathVariable String query, @AuthenticationPrincipal String currentUsername) {
+    public List<Users> getUsersByName(@PathVariable String query, @AuthenticationPrincipal String currentUsername) {
         return friendshipService.searchUsersByName(query, currentUsername);
     }
 
@@ -69,12 +69,12 @@ public class FriendshipRestController {
     }
 
     @GetMapping("/friends")
-    public List<User> getFriends(@AuthenticationPrincipal String currentUsername) {
+    public List<Users> getFriends(@AuthenticationPrincipal String currentUsername) {
         return friendshipService.getFriends(currentUsername);
     }
 
     @GetMapping("/blocked")
-    public List<User> getBlocked(@AuthenticationPrincipal String currentUsername) {
+    public List<Users> getBlocked(@AuthenticationPrincipal String currentUsername) {
         return friendshipService.getBlocked(currentUsername);
     }
 

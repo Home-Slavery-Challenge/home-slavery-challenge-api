@@ -1,7 +1,7 @@
 package com.canse.slave.utils;
 
 import com.canse.slave.entities.Role;
-import com.canse.slave.entities.User;
+import com.canse.slave.entities.Users;
 import com.canse.slave.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,7 +22,7 @@ public class AdminGenerator {
         if (userRole.isEmpty()) {
             userService.addRole(new Role("ADMIN"));
             userService.addRole(new Role("USER"));
-            User admin = User.builder()
+            Users admin = Users.builder()
                     .username(envConfig.getAdminUsername())
                     .email(envConfig.getAdminEmail())
                     .password(envConfig.getAdminPassword())

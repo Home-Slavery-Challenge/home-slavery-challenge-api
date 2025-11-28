@@ -23,10 +23,10 @@ public class Friendship {
     private Long id;
 
     @ManyToOne
-    private User requester;
+    private Users requester;
 
     @ManyToOne
-    private User receiver;
+    private Users receiver;
 
     private boolean isChecked;
 

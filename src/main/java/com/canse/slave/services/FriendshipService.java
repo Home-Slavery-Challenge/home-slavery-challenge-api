@@ -1,13 +1,13 @@
 package com.canse.slave.services;
 
 import com.canse.slave.entities.Friendship;
-import com.canse.slave.entities.User;
+import com.canse.slave.entities.Users;
 
 import java.util.List;
 
 public interface FriendshipService {
 
-    List<User> searchUsersByName(String query, String currentUser);
+    List<Users> searchUsersByName(String query, String currentUser);
 
     Friendship sendFriendRequest(String currentUser, Long targetUserId);
 
@@ -27,9 +27,9 @@ public interface FriendshipService {
 
     Friendship markAsChecked(Long friendshipId);
 
-    List<User> getFriends(String currentUser);
+    List<Users> getFriends(String currentUser);
 
-    List<User> getBlocked(String currentUser);
+    List<Users> getBlocked(String currentUser);
 
     void removeFriend(Long friendshipId);
 }

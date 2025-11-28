@@ -23,7 +23,7 @@ public class VerificationToken {
 
     @OneToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    private Users user;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -31,7 +31,7 @@ public class VerificationToken {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    public VerificationToken(String token, User user) {
+    public VerificationToken(String token, Users user) {
         super();
         this.token = token;
         this.user = user;
