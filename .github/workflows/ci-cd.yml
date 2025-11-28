@@ -9,6 +9,13 @@ on:
       - 'documentation/**'
       - 'README.md'
 
+  pull_request:
+    branches:
+      - dev
+    paths-ignore:
+      - 'documentation/**'
+      - 'README.md'
+
 jobs:
   # ==========================
   # 🧪 Tests sur la branche dev
