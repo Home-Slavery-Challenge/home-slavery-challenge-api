@@ -46,18 +46,18 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
     Friendship findByReceiverId(Long userId);
 
     @Query("""
-    SELECT f FROM Friendship f
-    WHERE f.status = 'ACCEPTED'
-      AND (f.requester.username = :currentUser OR f.receiver.username = :currentUser)
-    """)
+            SELECT f FROM Friendship f
+            WHERE f.status = 'ACCEPTED'
+              AND (f.requester.username = :currentUser OR f.receiver.username = :currentUser)
+            """)
     List<Friendship> findAcceptedFriendshipsOfUser(@Param("currentUser") String currentUser);
 
 
     @Query("""
-            SELECT f.requester
+            SELECT DISTINCT f.receiver
             FROM Friendship f
             WHERE f.status = 'BLOCKED'
-              AND f.receiver.username = :currentUser
+              AND f.requester.username = :currentUser
             """)
     List<Users> findBlockedUsersOf(@Param("currentUser") String currentUser);
 
