@@ -21,8 +21,10 @@ jobs:
   # 🧪 Tests sur la branche dev
   # ==========================
   tests:
-    if: github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/dev')
 
     steps:
       - name: Checkout repository
