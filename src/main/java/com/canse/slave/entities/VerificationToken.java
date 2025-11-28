@@ -3,7 +3,10 @@ package com.canse.slave.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -20,9 +23,15 @@ public class VerificationToken {
 
     @OneToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    private Users user;
 
-    public VerificationToken(String token, User user) {
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+
+    public VerificationToken(String token, Users user) {
         super();
         this.token = token;
         this.user = user;
