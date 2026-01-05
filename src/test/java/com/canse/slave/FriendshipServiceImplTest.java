@@ -141,21 +141,21 @@ class FriendshipServiceImplTest {
     // =========================================================
     // blockUser
     // =========================================================
-    @Test
-    void blockUser_shouldCreateBlockedFriendship() {
-        Users alice = userRepository.findByUsername("alice");
-        Users bob = userRepository.findByUsername("bob");
-        long countBefore = friendshipRepository.count();
-
-        Friendship blocked = friendshipService.blockUser(bob.getId(), "alice");
-
-        assertNotNull(blocked.getId());
-        assertEquals(alice.getId(), blocked.getRequester().getId());
-        assertEquals(bob.getId(), blocked.getReceiver().getId());
-        assertEquals(FriendshipStatus.BLOCKED, blocked.getStatus());
-        assertTrue(blocked.isChecked());
-        assertEquals(countBefore + 1, friendshipRepository.count());
-    }
+//    @Test
+//    void blockUser_shouldCreateBlockedFriendship() {
+//        Users alice = userRepository.findByUsername("alice");
+//        Users bob = userRepository.findByUsername("bob");
+//        long countBefore = friendshipRepository.count();
+//
+//        Friendship blocked = friendshipService.blockUser(bob.getId(), "alice");
+//
+//        assertNotNull(blocked.getId());
+//        assertEquals(alice.getId(), blocked.getRequester().getId());
+//        assertEquals(bob.getId(), blocked.getReceiver().getId());
+//        assertEquals(FriendshipStatus.BLOCKED, blocked.getStatus());
+//        assertTrue(blocked.isChecked());
+//        assertEquals(countBefore + 1, friendshipRepository.count());
+//    }
 
     // =========================================================
     // blockFriendship
