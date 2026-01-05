@@ -32,10 +32,10 @@ public class AdminGenerator {
             userService.saveUser(admin);
 
             userService.addRoleToUser(envConfig.getAdminUsername(), "ADMIN");
-        } else {
-            System.out.println("-------------------------------");
+        }else {
+            System.out.println("--------------------------------");
             System.out.println("| Admin and roles already exist |");
-            System.out.println("-------------------------------");
+            System.out.println("--------------------------------");
         }
     }
 }
