@@ -2,7 +2,7 @@ package com.canse.slave.services;
 
 import com.canse.slave.entities.RegistrationRequest;
 import com.canse.slave.entities.Role;
-import com.canse.slave.entities.User;
+import com.canse.slave.entities.Users;
 import com.canse.slave.entities.VerificationToken;
 import com.canse.slave.exceptions.EmailAlreadyExistException;
 import com.canse.slave.exceptions.ExpiredTokenException;
@@ -38,13 +38,13 @@ public class UserServiceImpl implements UserService {
     EmailSender emailSender;
 
     @Override
-    public User saveUser(User user) {
+    public Users saveUser(Users user) {
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         return this.userRepository.save(user);
     }
 
     @Override
-    public User findUserByUsername(String username) {
+    public Users findUserByUsername(String username) {
         return this.userRepository.findByUsername(username);
     }
 
@@ -59,28 +59,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User addRoleToUser(String username, String roleName) {
-        User user = this.userRepository.findByUsername(username);
+    public Users addRoleToUser(String username, String roleName) {
+        Users user = this.userRepository.findByUsername(username);
         Role role = this.roleRepository.findByName(roleName);
         user.getRoles().add(role);
         return user;
     }
 
     @Override
-    public List<User> findAllUsers() {
+    public List<Users> findAllUsers() {
         return this.userRepository.findAll();
     }
 
     @Override
-    public User registerUser(RegistrationRequest request) {
+    public Users registerUser(RegistrationRequest request) {
 
-        Optional<User> user = userRepository.findByEmail(request.getEmail());
+        Optional<Users> user = userRepository.findByEmail(request.getEmail());
 
         if (user.isPresent()) {
             throw new EmailAlreadyExistException("Email deja existant !");
         }
 
-        User newUser = new User();
+        Users newUser = new Users();
         newUser.setUsername(request.getUsername());
         newUser.setPassword(bCryptPasswordEncoder.encode(request.getPassword()));
         newUser.setEmail(request.getEmail());
@@ -108,18 +108,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void sendEmailUser(User user, String code) {
+    public void sendEmailUser(Users user, String code) {
         String body = "Bonjour " + "<h1>" + user.getUsername() + "</h1>" + " Votre code de validation est " + "<h1>" + code + "</h1>";
         emailSender.sendEmail(user.getEmail(), body);
     }
 
     @Override
-    public User validateToken(String code) {
+    public Users validateToken(String code) {
         VerificationToken token = verifTokenRepository.findByToken(code);
         if(token == null){
             throw  new InvalidTokenException("Invalide token !");
         }
-        User user = token.getUser();
+        Users user = token.getUser();
         Calendar calendar = Calendar.getInstance();
         if((token.getExpirationTime().getTime() - calendar.getTime().getTime()) <= 0){
             verifTokenRepository.delete(token);
@@ -129,5 +129,4 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         return user;
     }
-
 }
