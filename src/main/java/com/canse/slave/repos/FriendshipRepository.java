@@ -3,8 +3,10 @@ package com.canse.slave.repos;
 import com.canse.slave.entities.Friendship;
 import com.canse.slave.entities.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,6 +20,19 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
               AND f.requester.username = :currentUser
             """)
     List<Friendship> getPendingsSentRequests(@Param("currentUser") String currentUser);
+
+    @Query("""
+            SELECT f FROM Friendship f
+            WHERE f.requester.username = :currentUser
+            """)
+    List<Friendship> getAllFriendshipByRequester(@Param("currentUser") String currentUser);
+
+    @Query("""
+            SELECT f FROM Friendship f
+            WHERE f.requester.id = :userId
+            """)
+    List<Friendship> getAllFriendshipByReceiver(@Param("userId") Long userId);
+
 
     @Query("""
             SELECT f.receiver
@@ -60,5 +75,18 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
               AND f.requester.username = :currentUser
             """)
     List<Users> findBlockedUsersOf(@Param("currentUser") String currentUser);
+
+
+    @Modifying
+    @Transactional
+    @Query("""
+        DELETE FROM Friendship f
+        WHERE f.receiver.id = :receiverId
+          AND f.requester.username = :currentUser
+        """)
+    void deleteFriendshipByCurrenttargetRequester(
+            @Param("currentUser") String currentUser,
+            @Param("receiverId") Long receiverId
+    );
 
 }

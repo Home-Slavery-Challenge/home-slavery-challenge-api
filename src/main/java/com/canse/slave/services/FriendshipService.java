@@ -7,25 +7,28 @@ import java.util.List;
 
 public interface FriendshipService {
 
+
+    List<Friendship> getAllFriendshipByRequester(String currentUser );
     List<Users> searchUsersByName(String query, String currentUser);
 
     Friendship sendFriendRequest(String currentUser, Long targetUserId);
 
     Friendship acceptAndNormalizeFriendship(String currentUser, Long otherUserId);
 
-    void declineRequest(Long friendshipId);
+    void declinePendingRequest(Long friendshipId);
+    void declineFriendship(Long userIdTarget,String currentUser);
 
     Friendship blockUser(Long friendshipId, String currentUser);
 
     void blockFriendship(Long friendshipId, String currentUser);
 
-    void unblockUser(Long friendshipId);
+    void unblockUser(Long friendshipId,String currentUser);
 
     List<Friendship> getPendingReceivedRequests(String currentUser);
 
     List<Friendship> getPendingSentRequests(String currentUser);
 
-    Friendship markAsChecked(Long friendshipId);
+    void markAsChecked(String currentUsername);
 
     List<Users> getFriends(String currentUser);
 

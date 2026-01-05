@@ -10,12 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 // TODO : Créer des DTO pour exposer les données au front
 
 /*
-* Requester -> Maitre de la relation
-* */
+ * Requester -> Maitre de la relation
+ * */
 
 
 @Transactional
@@ -37,17 +38,43 @@ public class FriendshipServiceImpl implements FriendshipService {
                 .orElseThrow(() -> new IllegalArgumentException("Friendship not found: " + friendshipId));
     }
 
+    @Override
+    public List<Friendship> getAllFriendshipByRequester(String currentUser) {
+        return friendshipRepository.getAllFriendshipByRequester(currentUser).stream().toList();
+    }
+
     /**
-     * Recherche des utilisateurs par nom, en excluant l'utilisateur courant des résultats.
-     *
-     * @param query       fragment de nom / username à rechercher
-     * @param currentUser username de l'utilisateur courant
-     * @return liste des utilisateurs correspondant à la recherche, sans inclure currentUser
+     * Recherche des utilisateurs par nom excluant current user, pending et blocked.
      */
+
     @Override
     public List<Users> searchUsersByName(String query, String currentUser) {
+
+        // Accepted
+        Set<String> acceptedUsernames = this.getFriends(currentUser).stream()
+                .map(Users::getUsername)
+                .collect(java.util.stream.Collectors.toSet());
+
+        // Blocked
+        Set<String> blockedUsernames = this.getBlocked(currentUser).stream()
+                .map(Users::getUsername)
+                .collect(java.util.stream.Collectors.toSet());
+
+        // Pending
+        Set<Long> pendingReceiverIds = this.getPendingSentRequests(currentUser).stream()
+                .map(f -> f.getReceiver().getId())
+                .collect(java.util.stream.Collectors.toSet());
+
+        // Filters
         return userRepository.findByUsernameContainsIgnoreCase(query).stream()
-                .filter(u -> !u.getUsername().equals(currentUser))
+                // current
+                .filter(u -> !u.getUsername().equalsIgnoreCase(currentUser))
+                // accepted
+                .filter(u -> !acceptedUsernames.contains(u.getUsername()))
+                // blocked
+                .filter(u -> !blockedUsernames.contains(u.getUsername()))
+                // pending
+                .filter(u -> !pendingReceiverIds.contains(u.getId()))
                 .toList();
     }
 
@@ -131,11 +158,11 @@ public class FriendshipServiceImpl implements FriendshipService {
     /**
      * Décline une demande d'amitié et supprime toutes les relations
      * entre les deux utilisateurs (A→B et B→A) encore en base.
-     *
-     * @param friendshipId identifiant de la relation à refuser
+     * Effectué par requester ou receiver, methode generaliste.
      */
+
     @Override
-    public void declineRequest(Long friendshipId) {
+    public void declinePendingRequest(Long friendshipId) {
         Friendship friendship = getFriendshipOrThrow(friendshipId);
 
         Long userA = friendship.getRequester().getId();
@@ -145,6 +172,19 @@ public class FriendshipServiceImpl implements FriendshipService {
                 friendshipRepository.findAllFriendshipsBetween(userA, userB);
 
         friendshipRepository.deleteAll(allRelations);
+    }
+
+    /*
+    * Decline friendship by user id targeted with current user token
+    * */
+
+    @Override
+    public void declineFriendship(Long userIdTarget, String currentUser) {
+        List<Friendship> listA = friendshipRepository.getAllFriendshipByRequester(currentUser);
+        List<Friendship> listB = friendshipRepository.getAllFriendshipByReceiver(userIdTarget);
+
+        friendshipRepository.deleteAll(listA);
+        friendshipRepository.deleteAll(listB);
     }
 
     /**
@@ -167,6 +207,11 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         Users blocked = userRepository.findById(userIdToBlock)
                 .orElseThrow(() -> new IllegalArgumentException("User to block not found: " + userIdToBlock));
+
+        List<Friendship> existing = friendshipRepository.findAllFriendshipsBetween(blocker.getId(), blocked.getId());
+        if (!existing.isEmpty()) {
+            friendshipRepository.deleteAll(existing);
+        }
 
         Friendship friendship = new Friendship();
         friendship.setRequester(blocker);
@@ -228,12 +273,11 @@ public class FriendshipServiceImpl implements FriendshipService {
      * Seule la relation de blocage (BLOCKED) est supprimée. Il sera nécessaire
      * de recréer une nouvelle relation d'amitié si besoin par la suite.
      *
-     * @param friendshipId identifiant de la relation de blocage à supprimer
      */
     @Override
-    public void unblockUser(Long friendshipId) {
-        Friendship friendship = getFriendshipOrThrow(friendshipId);
-        friendshipRepository.delete(friendship);
+    public void unblockUser(Long userIdReceiver, String currentUser) {
+        friendshipRepository.deleteFriendshipByCurrenttargetRequester(currentUser, userIdReceiver
+        );
     }
 
     /**
@@ -260,17 +304,18 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     /**
-     * Marque une demande d'amitié comme "vue" (checked = true),
+     * Marque les demandes d'amitié comme "vue" (checked = true),
      * permet de faire disparaître un badge de notification dans l'interface.
      *
-     * @param friendshipId identifiant de la relation à marquer comme vue
-     * @return la relation mise à jour
      */
     @Override
-    public Friendship markAsChecked(Long friendshipId) {
-        Friendship friendship = getFriendshipOrThrow(friendshipId);
-        friendship.setChecked(true);
-        return friendshipRepository.save(friendship);
+    @Transactional
+    public void markAsChecked(String currentUsername) {
+        List<Friendship> pendingReceived = getPendingReceivedRequests(currentUsername);
+
+        pendingReceived.forEach(f -> f.setChecked(true));
+
+        friendshipRepository.saveAll(pendingReceived);
     }
 
     /**
