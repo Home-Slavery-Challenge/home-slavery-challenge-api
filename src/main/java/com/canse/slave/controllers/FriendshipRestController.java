@@ -32,13 +32,18 @@ public class FriendshipRestController {
         return friendshipService.acceptAndNormalizeFriendship(currentUser, friendshipId);
     }
 
-    @PostMapping("/decline/{friendshipId}")
+    @PostMapping("/decline-request/{friendshipId}")
     public void declineFriendshipRequest(@PathVariable Long friendshipId) {
-        friendshipService.declineRequest(friendshipId);
+        friendshipService.declinePendingRequest(friendshipId);
+    }
+
+    @PostMapping("/decline-friendship/{userIdTarget}")
+    public void declineFriendshipRequest(@PathVariable Long userIdTarget, @AuthenticationPrincipal String currentUser) {
+        friendshipService.declineFriendship(userIdTarget,currentUser);
     }
 
     @PostMapping("/block-user/{friendshipId}")
-    public Friendship unblockUser(@PathVariable Long friendshipId, @AuthenticationPrincipal String currentUser) {
+    public Friendship blockUser(@PathVariable Long friendshipId, @AuthenticationPrincipal String currentUser) {
         return friendshipService.blockUser(friendshipId, currentUser);
     }
 
@@ -48,9 +53,9 @@ public class FriendshipRestController {
     }
 
 
-    @PostMapping("/unblock-user/{friendshipId}")
-    public void unblockUser(@PathVariable Long friendshipId) {
-        friendshipService.unblockUser(friendshipId);
+    @PostMapping("/unblock-user/{userIdReceiver}")
+    public void unblockUser(@PathVariable Long userIdReceiver, @AuthenticationPrincipal String currentUser) {
+        friendshipService.unblockUser(userIdReceiver,currentUser);
     }
 
     @GetMapping("/pending-received")
@@ -63,9 +68,9 @@ public class FriendshipRestController {
         return friendshipService.getPendingSentRequests(currentUsername);
     }
 
-    @PostMapping("/check/{friendshipId}")
-    public Friendship markAsChecked(@PathVariable Long friendshipId) {
-        return friendshipService.markAsChecked(friendshipId);
+    @PostMapping("/check")
+    public void markAsChecked(@AuthenticationPrincipal String currentUsername) {
+        friendshipService.markAsChecked(currentUsername);
     }
 
     @GetMapping("/friends")

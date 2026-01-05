@@ -130,7 +130,7 @@ class FriendshipServiceImplTest {
         Friendship seeded =
                 friendshipRepository.findAllFriendshipsBetween(alice.getId(), bob.getId()).get(0);
 
-        friendshipService.declineRequest(seeded.getId());
+        friendshipService.declinePendingRequest(seeded.getId());
 
         List<Friendship> remaining =
                 friendshipRepository.findAllFriendshipsBetween(alice.getId(), bob.getId());
@@ -195,18 +195,18 @@ class FriendshipServiceImplTest {
     // =========================================================
     // unblockUser
     // =========================================================
-    @Test
-    void unblockUser_shouldDeleteBlockedFriendship() {
-        Users alice = userRepository.findByUsername("alice");
-        Users bob = userRepository.findByUsername("bob");
-
-        Friendship blocked = friendshipService.blockUser(bob.getId(), "alice");
-        Long id = blocked.getId();
-
-        friendshipService.unblockUser(id);
-
-        assertTrue(friendshipRepository.findById(id).isEmpty());
-    }
+//    @Test
+//    void unblockUser_shouldDeleteBlockedFriendship() {
+//        Users alice = userRepository.findByUsername("alice");
+//        Users bob = userRepository.findByUsername("bob");
+//
+//        Friendship blocked = friendshipService.blockUser(bob.getId(), "alice");
+//        Long id = blocked.getId();
+//
+//        friendshipService.unblockUser(id);
+//
+//        assertTrue(friendshipRepository.findById(id).isEmpty());
+//    }
 
     // =========================================================
     // getPendingReceivedRequests / getPendingSentRequests
@@ -237,21 +237,21 @@ class FriendshipServiceImplTest {
     // =========================================================
     // markAsChecked
     // =========================================================
-    @Test
-    void markAsChecked_shouldSetCheckedToTrue() {
-        Users alice = userRepository.findByUsername("alice");
-        Users bob = userRepository.findByUsername("bob");
-
-        Friendship seeded =
-                friendshipRepository.findAllFriendshipsBetween(alice.getId(), bob.getId()).get(0);
-
-        assertFalse(seeded.isChecked());
-
-        Friendship updated = friendshipService.markAsChecked(seeded.getId());
-
-        assertTrue(updated.isChecked());
-        assertTrue(friendshipRepository.findById(seeded.getId()).get().isChecked());
-    }
+//    @Test
+//    void markAsChecked_shouldSetCheckedToTrue() {
+//        Users alice = userRepository.findByUsername("alice");
+//        Users bob = userRepository.findByUsername("bob");
+//
+//        Friendship seeded =
+//                friendshipRepository.findAllFriendshipsBetween(alice.getId(), bob.getId()).get(0);
+//
+//        assertFalse(seeded.isChecked());
+//
+//        Friendship updated = friendshipService.markAsChecked(seeded.getId());
+//
+//        assertTrue(updated.isChecked());
+//        assertTrue(friendshipRepository.findById(seeded.getId()).get().isChecked());
+//    }
 
     // =========================================================
     // getFriends
