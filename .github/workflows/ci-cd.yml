@@ -77,50 +77,63 @@ jobs:
   # ==========================
   # 🚀 Déploiement sur le serveur
   # ==========================
-  deploy-to-server:
-    if: github.ref == 'refs/heads/main'
-    needs: docker-build-and-push
-    runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
 
       - name: Upload docker-compose.prod.yml to server
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASSWORD }}
+          username: ${{ secrets.SSH_USER_UPLOAD }}
+          key: ${{ secrets.SSH_KEY_DEPLOY_UPLOAD }}
           source: "deploy/docker-compose.prod.yml"
           target: "/srv/slavery-home-challenge-api"
           overwrite: true
-          strip_components: 1
+          strip_components: 2
 
-      - name: Deploy on server
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASSWORD }}
-          script: |
-            set -e
-      
-            cd /srv/slavery-home-challenge-api
-      
-            echo "Current directory:"
-            pwd
-      
-            echo "Docker version:"
-            docker --version || echo "docker not found"
-      
-            echo "Docker Compose version:"
-            docker compose version || echo "docker compose not found"
-      
-            echo "Pulling latest images..."
-            docker compose -f docker-compose.prod.yml pull
-      
-            echo "Restarting containers..."
-            docker compose -f docker-compose.prod.yml up -d --remove-orphans
-      
-            echo "Done ✅"
+#  deploy-to-server:
+#    if: github.ref == 'refs/heads/main'
+#    needs: docker-build-and-push
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v4
+#
+#      - name: Upload docker-compose.prod.yml to server
+#        uses: appleboy/scp-action@v0.1.4
+#        with:
+#          host: ${{ secrets.SSH_HOST }}
+#          username: ${{ secrets.SSH_USER }}
+#          password: ${{ secrets.SSH_PASSWORD }}
+#          source: "deploy/docker-compose.prod.yml"
+#          target: "/srv/slavery-home-challenge-api"
+#          overwrite: true
+#          strip_components: 1
+
+#      - name: Deploy on server
+#        uses: appleboy/ssh-action@v1.0.0
+#        with:
+#          host: ${{ secrets.SSH_HOST }}
+#          username: ${{ secrets.SSH_USER }}
+#          password: ${{ secrets.SSH_PASSWORD }}
+#          script: |
+#            set -e
+#
+#            cd /srv/slavery-home-challenge-api
+#
+#            echo "Current directory:"
+#            pwd
+#
+#            echo "Docker version:"
+#            docker --version || echo "docker not found"
+#
+#            echo "Docker Compose version:"
+#            docker compose version || echo "docker compose not found"
+#
+#            echo "Pulling latest images..."
+#            docker compose -f docker-compose.prod.yml pull
+#
+#            echo "Restarting containers..."
+#            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+#
+#            echo "Done ✅"
