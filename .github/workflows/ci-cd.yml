@@ -83,12 +83,12 @@ jobs:
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER_UPLOAD }}
-          key: ${{ secrets.SSH_KEY_DEPLOY_UPLOAD }}
+          username: ${{ secrets.SSH_USER_UPDATE }}
+          key: ${{ secrets.SSH_KEY_UPDATE }}
           source: "deploy/docker-compose.prod.yml"
           target: "/srv/slavery-home-challenge-api"
           overwrite: true
-          strip_components: 2
+          strip_components: 1
 
 #  deploy-to-server:
 #    if: github.ref == 'refs/heads/main'
