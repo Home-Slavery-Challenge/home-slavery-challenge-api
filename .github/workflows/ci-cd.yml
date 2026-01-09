@@ -86,6 +86,7 @@ jobs:
           username: ${{ secrets.SSH_USER_UPDATE }}
           key: ${{ secrets.SSH_KEY_UPDATE }}
           source: "deploy/docker-compose.prod.yml"
+          passphrase: ${{ secrets.SSH_KEY_UPDATE_SLAVE_PASSPHRASE }}
           target: "/srv/slavery-home-challenge-api"
           overwrite: true
           strip_components: 1
