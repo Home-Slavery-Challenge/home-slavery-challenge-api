@@ -78,18 +78,42 @@ jobs:
   # 🚀 Déploiement sur le serveur
   # ==========================
 
-
       - name: Upload docker-compose.prod.yml to server
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER_UPDATE }}
           key: ${{ secrets.SSH_KEY_UPDATE }}
-          source: "deploy/docker-compose.prod.yml"
           passphrase: ${{ secrets.SSH_KEY_UPDATE_SLAVE_PASSPHRASE }}
+          source: "deploy/docker-compose.prod.yml"
           target: "/srv/slavery-home-challenge-api"
           overwrite: true
           strip_components: 1
+
+      - name: Upload deploy.sh to server
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER_UPDATE }}
+          key: ${{ secrets.SSH_KEY_UPDATE }}
+          passphrase: ${{ secrets.SSH_KEY_UPDATE_SLAVE_PASSPHRASE }}
+          source: "deploy/deploy.sh"
+          target: "/srv/slavery-home-challenge-api"
+          overwrite: true
+          strip_components: 1
+
+      - name: Run deploy.sh on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER_UPDATE }}
+          key: ${{ secrets.SSH_KEY_UPDATE }}
+          passphrase: ${{ secrets.SSH_KEY_UPDATE_SLAVE_PASSPHRASE }}
+          script: |
+            set -e
+            cd /srv/slavery-home-challenge-api
+            chmod +x deploy.sh
+            ./deploy.sh
 
 #  deploy-to-server:
 #    if: github.ref == 'refs/heads/main'
