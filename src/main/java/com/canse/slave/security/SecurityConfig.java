@@ -15,6 +15,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.util.Collections;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -33,19 +34,19 @@ public class SecurityConfig {
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 
                         CorsConfiguration cors = new CorsConfiguration();
-                        cors.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
-                        cors.setAllowedMethods(Collections.singletonList("*"));
-                        cors.setAllowedHeaders(Collections.singletonList("*"));
+                        cors.setAllowedOriginPatterns(List.of("http://localhost:*"));
+                        cors.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
+                        cors.setAllowedHeaders(List.of("*"));
+                        cors.setExposedHeaders(List.of("Authorization"));
                         cors.setAllowCredentials(true);
-                        cors.setExposedHeaders(Collections.singletonList("Authorization"));
                         cors.setMaxAge(3600L);
 
                         return cors;
                     }
                 }))
                 .authorizeHttpRequests(request -> request
-                                .requestMatchers("/api/login","api/auth/register").permitAll()
-                                .anyRequest().permitAll()
+                        .requestMatchers("/api/login", "/api/auth/register").permitAll()
+                        .anyRequest().permitAll()
                 )
                 .addFilterBefore(new JWTAuthentication(authManager), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
