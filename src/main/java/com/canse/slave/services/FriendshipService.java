@@ -1,5 +1,6 @@
 package com.canse.slave.services;
 
+import com.canse.slave.dto.UserSummaryDto;
 import com.canse.slave.entities.Friendship;
 import com.canse.slave.entities.Users;
 
@@ -31,6 +32,7 @@ public interface FriendshipService {
     void markAsChecked(String currentUsername);
 
     List<Users> getFriends(String currentUser);
+    List<UserSummaryDto> getSummaryFriends(String currentUser);
 
     List<Users> getBlocked(String currentUser);
 

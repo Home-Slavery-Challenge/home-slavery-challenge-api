@@ -1,5 +1,6 @@
 package com.canse.slave.services;
 
+import com.canse.slave.dto.UserSummaryDto;
 import com.canse.slave.entities.Friendship;
 import com.canse.slave.entities.Users;
 import com.canse.slave.enums.FriendshipStatus;
@@ -335,6 +336,20 @@ public class FriendshipServiceImpl implements FriendshipService {
                         ? f.getReceiver()
                         : f.getRequester())
                 .distinct() // au cas où
+                .toList();
+    }
+
+    @Override
+    public List<UserSummaryDto> getSummaryFriends(String currentUser) {
+        List<Friendship> friendships =
+                friendshipRepository.findAcceptedFriendshipsOfUser(currentUser);
+
+        return friendships.stream()
+                .map(f -> f.getRequester().getUsername().equals(currentUser)
+                        ? f.getReceiver()
+                        : f.getRequester())
+                .distinct()
+                .map(u -> new UserSummaryDto(u.getId(), u.getUsername()))
                 .toList();
     }
 
