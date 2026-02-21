@@ -1,5 +1,6 @@
 package com.canse.slave.controllers;
 
+import com.canse.slave.dto.UserSummaryDto;
 import com.canse.slave.entities.Friendship;
 import com.canse.slave.entities.Users;
 import com.canse.slave.services.FriendshipService;
@@ -74,8 +75,8 @@ public class FriendshipRestController {
     }
 
     @GetMapping("/friends")
-    public List<Users> getFriends(@AuthenticationPrincipal String currentUsername) {
-        return friendshipService.getFriends(currentUsername);
+    public List<UserSummaryDto> getSummaryFriends(@AuthenticationPrincipal String currentUsername) {
+        return friendshipService.getSummaryFriends(currentUsername);
     }
 
     @GetMapping("/blocked")
