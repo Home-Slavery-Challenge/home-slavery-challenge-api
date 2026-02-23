@@ -2,6 +2,7 @@ package com.canse.slave.repos;
 
 import com.canse.slave.entities.Friendship;
 import com.canse.slave.entities.Users;
+import com.canse.slave.projections.FriendshipLiteProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -19,7 +20,7 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
             WHERE f.status = 'PENDING'
               AND f.requester.username = :currentUser
             """)
-    List<Friendship> getPendingsSentRequests(@Param("currentUser") String currentUser);
+    List<FriendshipLiteProjection> getPendingsSentRequests(@Param("currentUser") String currentUser);
 
     @Query("""
             SELECT f FROM Friendship f

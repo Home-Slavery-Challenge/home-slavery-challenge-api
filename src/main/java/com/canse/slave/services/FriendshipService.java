@@ -3,6 +3,7 @@ package com.canse.slave.services;
 import com.canse.slave.dto.UserSummaryDto;
 import com.canse.slave.entities.Friendship;
 import com.canse.slave.entities.Users;
+import com.canse.slave.projections.FriendshipLiteProjection;
 
 import java.util.List;
 
@@ -10,7 +11,7 @@ public interface FriendshipService {
 
 
     List<Friendship> getAllFriendshipByRequester(String currentUser );
-    List<Users> searchUsersByName(String query, String currentUser);
+    List<UserSummaryDto> searchUsersByName(String query, String currentUser);
 
     Friendship sendFriendRequest(String currentUser, Long targetUserId);
 
@@ -27,7 +28,7 @@ public interface FriendshipService {
 
     List<Friendship> getPendingReceivedRequests(String currentUser);
 
-    List<Friendship> getPendingSentRequests(String currentUser);
+    List<FriendshipLiteProjection> getPendingSentRequests(String currentUser);
 
     void markAsChecked(String currentUsername);
 

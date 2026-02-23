@@ -3,6 +3,7 @@ package com.canse.slave.controllers;
 import com.canse.slave.dto.UserSummaryDto;
 import com.canse.slave.entities.Friendship;
 import com.canse.slave.entities.Users;
+import com.canse.slave.projections.FriendshipLiteProjection;
 import com.canse.slave.services.FriendshipService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,7 +20,7 @@ public class FriendshipRestController {
     FriendshipService friendshipService;
 
     @GetMapping("/search-by-name/{query}")
-    public List<Users> getUsersByName(@PathVariable String query, @AuthenticationPrincipal String currentUsername) {
+    public List<UserSummaryDto> getUsersByName(@PathVariable String query, @AuthenticationPrincipal String currentUsername) {
         return friendshipService.searchUsersByName(query, currentUsername);
     }
 
@@ -65,7 +66,7 @@ public class FriendshipRestController {
     }
 
     @GetMapping("/pending-sent")
-    public List<Friendship> getPendingSent(@AuthenticationPrincipal String currentUsername) {
+    public List<FriendshipLiteProjection> getPendingSent(@AuthenticationPrincipal String currentUsername) {
         return friendshipService.getPendingSentRequests(currentUsername);
     }
 

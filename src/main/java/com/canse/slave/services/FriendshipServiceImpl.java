@@ -4,6 +4,7 @@ import com.canse.slave.dto.UserSummaryDto;
 import com.canse.slave.entities.Friendship;
 import com.canse.slave.entities.Users;
 import com.canse.slave.enums.FriendshipStatus;
+import com.canse.slave.projections.FriendshipLiteProjection;
 import com.canse.slave.repos.FriendshipRepository;
 import com.canse.slave.repos.UserRepository;
 import jakarta.transaction.Transactional;
@@ -49,7 +50,7 @@ public class FriendshipServiceImpl implements FriendshipService {
      */
 
     @Override
-    public List<Users> searchUsersByName(String query, String currentUser) {
+    public List<UserSummaryDto> searchUsersByName(String query, String currentUser) {
 
         // Accepted
         Set<String> acceptedUsernames = this.getFriends(currentUser).stream()
@@ -69,13 +70,13 @@ public class FriendshipServiceImpl implements FriendshipService {
         // Filters
         return userRepository.findByUsernameContainsIgnoreCase(query).stream()
                 // current
-                .filter(u -> !u.getUsername().equalsIgnoreCase(currentUser))
+                .filter(u -> !u.username().equalsIgnoreCase(currentUser))
                 // accepted
-                .filter(u -> !acceptedUsernames.contains(u.getUsername()))
+                .filter(u -> !acceptedUsernames.contains(u.username()))
                 // blocked
-                .filter(u -> !blockedUsernames.contains(u.getUsername()))
+                .filter(u -> !blockedUsernames.contains(u.username()))
                 // pending
-                .filter(u -> !pendingReceiverIds.contains(u.getId()))
+                .filter(u -> !pendingReceiverIds.contains(u.id()))
                 .toList();
     }
 
@@ -300,7 +301,7 @@ public class FriendshipServiceImpl implements FriendshipService {
      * @return liste des demandes envoyées en attente
      */
     @Override
-    public List<Friendship> getPendingSentRequests(String currentUser) {
+    public List<FriendshipLiteProjection> getPendingSentRequests(String currentUser) {
         return friendshipRepository.getPendingsSentRequests(currentUser);
     }
 
