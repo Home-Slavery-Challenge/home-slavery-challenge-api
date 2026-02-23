@@ -1,5 +1,6 @@
 package com.canse.slave.services;
 
+import com.canse.slave.projections.ChallengeLiteProjection;
 import com.canse.slave.dto.CreateChallengeRequest;
 import com.canse.slave.entities.ChallengeGroup;
 import com.canse.slave.entities.Reward;
@@ -144,7 +145,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
-    public List<ChallengeGroup> getLightChallenges(String currentUsername) {
+    public List<ChallengeLiteProjection> getLightChallenges(String currentUsername) {
         Users user = userRepository.findByUsername(currentUsername);
         if (user == null) {
             throw new ResponseStatusException(UNAUTHORIZED, "User not found");
