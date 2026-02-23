@@ -9,7 +9,9 @@ import com.canse.slave.repos.FriendshipRepository;
 import com.canse.slave.repos.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Set;
@@ -177,16 +179,24 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     /*
-    * Decline friendship by user id targeted with current user token
-    * */
+     * Decline friendship by user id targeted with current user token
+     * */
 
     @Override
-    public void declineFriendship(Long userIdTarget, String currentUser) {
-        List<Friendship> listA = friendshipRepository.getAllFriendshipByRequester(currentUser);
-        List<Friendship> listB = friendshipRepository.getAllFriendshipByReceiver(userIdTarget);
+    public void declineFriendship(Long userIdTarget, String currentUsername) {
+        Users current = userRepository.findByUsername(currentUsername);
+        if (current == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found");
+        }
 
-        friendshipRepository.deleteAll(listA);
-        friendshipRepository.deleteAll(listB);
+        List<Friendship> relations = friendshipRepository.findAllBetweenUsers(current.getId(), userIdTarget);
+
+        if (relations.isEmpty()) {
+            return;
+            // throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Friendship not found");
+        }
+
+        friendshipRepository.deleteAll(relations);
     }
 
     /**

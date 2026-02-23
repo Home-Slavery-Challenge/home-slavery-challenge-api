@@ -90,4 +90,11 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
             @Param("receiverId") Long receiverId
     );
 
+    @Query("""
+        select f from Friendship f
+        where (f.requester.id = :currentId and f.receiver.id = :targetId)
+           or (f.requester.id = :targetId and f.receiver.id = :currentId)
+    """)
+    List<Friendship> findAllBetweenUsers(@Param("currentId") Long currentId,
+                                         @Param("targetId") Long targetId);
 }
