@@ -12,6 +12,7 @@ import com.canse.slave.repos.TaskRepository;
 import com.canse.slave.repos.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -38,7 +39,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     private RewardRepository rewardRepository;
 
     @Override
-    public void createChallenge(String currentUsername, CreateChallengeRequest req) {
+    public void create(String currentUsername, CreateChallengeRequest req) {
 
         // --- AUTH ---
         if (currentUsername == null || currentUsername.isBlank()) {
@@ -127,6 +128,19 @@ public class ChallengeServiceImpl implements ChallengeService {
         // --- SAVE ---
         challengeGroupRepository.save(group);
 
+    }
+
+    @Override
+    public void delete(String currentUsername, Long challengeId) {
+        Users user = userRepository.findByUsername(currentUsername);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found");
+        }
+        ChallengeGroup challenge = challengeGroupRepository.findById(challengeId).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Challenge not found"));
+        if (!Objects.equals(challenge.getOwner().getId(), user.getId())) {
+            throw new ResponseStatusException(FORBIDDEN, "No authorized to delete");
+        }
+        challengeGroupRepository.delete(challenge);
     }
 
     @Override
