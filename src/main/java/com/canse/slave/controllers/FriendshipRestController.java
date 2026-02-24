@@ -6,6 +6,8 @@ import com.canse.slave.entities.Users;
 import com.canse.slave.projections.FriendshipLiteProjection;
 import com.canse.slave.services.FriendshipService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,13 +27,15 @@ public class FriendshipRestController {
     }
 
     @PostMapping("/create/{targetId}")
-    public Friendship createFriendship(@PathVariable Long targetId, @AuthenticationPrincipal String currentUsername) {
-        return friendshipService.sendFriendRequest(currentUsername, targetId);
+    public ResponseEntity<Void> createFriendship(@PathVariable Long targetId, @AuthenticationPrincipal String currentUsername) {
+        friendshipService.sendFriendRequest(currentUsername, targetId);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PostMapping("/accept/{friendshipId}")
-    public Friendship acceptFriendship(@PathVariable Long friendshipId, @AuthenticationPrincipal String currentUser) {
-        return friendshipService.acceptAndNormalizeFriendship(currentUser, friendshipId);
+    public ResponseEntity<Void> acceptFriendship(@PathVariable Long friendshipId, @AuthenticationPrincipal String currentUser) {
+        friendshipService.acceptAndNormalizeFriendship(currentUser, friendshipId);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PostMapping("/decline-request/{friendshipId}")
@@ -45,13 +49,15 @@ public class FriendshipRestController {
     }
 
     @PostMapping("/block-user/{friendshipId}")
-    public Friendship blockUser(@PathVariable Long friendshipId, @AuthenticationPrincipal String currentUser) {
-        return friendshipService.blockUser(friendshipId, currentUser);
+    public ResponseEntity<Void> blockUser(@PathVariable Long friendshipId, @AuthenticationPrincipal String currentUser) {
+        friendshipService.blockUser(friendshipId, currentUser);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
     @PostMapping("/block-friendship/{friendshipId}")
-    public void blockFriendship(@PathVariable Long friendshipId, @AuthenticationPrincipal String currentUser) {
+    public ResponseEntity<Void> blockFriendship(@PathVariable Long friendshipId, @AuthenticationPrincipal String currentUser) {
         friendshipService.blockFriendship(friendshipId, currentUser);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
 

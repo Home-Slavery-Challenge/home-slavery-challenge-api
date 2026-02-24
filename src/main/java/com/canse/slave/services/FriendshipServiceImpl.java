@@ -16,6 +16,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Set;
 
+import static org.springframework.http.HttpStatus.FORBIDDEN;
+
 // TODO : Créer des DTO pour exposer les données au front
 
 /*
@@ -93,7 +95,7 @@ public class FriendshipServiceImpl implements FriendshipService {
      * @return la relation d'amitié existante ou nouvellement créée
      */
     @Override
-    public Friendship sendFriendRequest(String currentUser, Long targetUserId) {
+    public void sendFriendRequest(String currentUser, Long targetUserId) {
 
         Users userRequester = userRepository.findByUsername(currentUser);
         if (userRequester == null) {
@@ -106,7 +108,7 @@ public class FriendshipServiceImpl implements FriendshipService {
         Friendship friendshipAlreadyExist =
                 friendshipRepository.getAlreadyExistsFriendship(userRequester.getId(), userReceiver.getId());
         if (friendshipAlreadyExist != null) {
-            return friendshipAlreadyExist;
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Friendship already exist");
         }
 
         Friendship friendship = new Friendship();
@@ -114,7 +116,7 @@ public class FriendshipServiceImpl implements FriendshipService {
         friendship.setReceiver(userReceiver);
         friendship.setChecked(false);
         friendship.setStatus(FriendshipStatus.PENDING);
-        return friendshipRepository.save(friendship);
+        friendshipRepository.save(friendship);
     }
 
     /**
@@ -210,7 +212,7 @@ public class FriendshipServiceImpl implements FriendshipService {
      * Aucun lien d'amitié préalable n'est nécessaire.
      */
     @Override
-    public Friendship blockUser(Long userIdToBlock, String currentUser) {
+    public void blockUser(Long userIdToBlock, String currentUser) {
 
         Users blocker = userRepository.findByUsername(currentUser);
         if (blocker == null) {
@@ -231,7 +233,7 @@ public class FriendshipServiceImpl implements FriendshipService {
         friendship.setChecked(true);
         friendship.setStatus(FriendshipStatus.BLOCKED);
 
-        return friendshipRepository.save(friendship);
+        friendshipRepository.save(friendship);
     }
 
     /**

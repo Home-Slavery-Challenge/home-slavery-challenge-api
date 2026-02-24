@@ -13,14 +13,14 @@ public interface FriendshipService {
     List<Friendship> getAllFriendshipByRequester(String currentUser );
     List<UserSummaryDto> searchUsersByName(String query, String currentUser);
 
-    Friendship sendFriendRequest(String currentUser, Long targetUserId);
+    void sendFriendRequest(String currentUser, Long targetUserId);
 
     Friendship acceptAndNormalizeFriendship(String currentUser, Long otherUserId);
 
     void declinePendingRequest(Long friendshipId);
     void declineFriendship(Long userIdTarget,String currentUser);
 
-    Friendship blockUser(Long friendshipId, String currentUser);
+    void blockUser(Long friendshipId, String currentUser);
 
     void blockFriendship(Long friendshipId, String currentUser);
 
