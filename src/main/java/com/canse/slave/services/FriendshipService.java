@@ -26,7 +26,7 @@ public interface FriendshipService {
 
     void unblockUser(Long friendshipId,String currentUser);
 
-    List<Friendship> getPendingReceivedRequests(String currentUser);
+    List<FriendshipLiteProjection> getPendingReceivedRequests(String currentUser);
 
     List<FriendshipLiteProjection> getPendingSentRequests(String currentUser);
 
@@ -35,7 +35,7 @@ public interface FriendshipService {
     List<Users> getFriends(String currentUser);
     List<UserSummaryDto> getSummaryFriends(String currentUser);
 
-    List<Users> getBlocked(String currentUser);
+    List<UserSummaryDto> getBlocked(String currentUser);
 
     void removeFriend(Long friendshipId);
 }

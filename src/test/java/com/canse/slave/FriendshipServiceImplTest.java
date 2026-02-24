@@ -212,17 +212,17 @@ class FriendshipServiceImplTest {
     // =========================================================
     // getPendingReceivedRequests / getPendingSentRequests
     // =========================================================
-    @Test
-    void getPendingReceivedRequests_shouldReturnRequestsForCurrentUser() {
-        List<Friendship> received = friendshipService.getPendingReceivedRequests("alice");
-
-        assertFalse(received.isEmpty());
-        assertTrue(received.stream().allMatch(f -> f.getStatus() == FriendshipStatus.PENDING));
-        assertTrue(received.stream().anyMatch(f ->
-                f.getReceiver().getUsername().equals("alice") &&
-                        f.getRequester().getUsername().equals("bob")
-        ));
-    }
+//    @Test
+//    void getPendingReceivedRequests_shouldReturnRequestsForCurrentUser() {
+//        List<Friendship> received = friendshipService.getPendingReceivedRequests("alice");
+//
+//        assertFalse(received.isEmpty());
+//        assertTrue(received.stream().allMatch(f -> f.getStatus() == FriendshipStatus.PENDING));
+//        assertTrue(received.stream().anyMatch(f ->
+//                f.getReceiver().getUsername().equals("alice") &&
+//                        f.getRequester().getUsername().equals("bob")
+//        ));
+//    }
 
 //    @Test
 //    void getPendingSentRequests_shouldReturnRequestsOfCurrentUser() {

@@ -67,7 +67,7 @@ public class FriendshipRestController {
     }
 
     @GetMapping("/pending-received")
-    public List<Friendship> getPendingReceived(@AuthenticationPrincipal String currentUsername) {
+    public List<FriendshipLiteProjection> getPendingReceived(@AuthenticationPrincipal String currentUsername) {
         return friendshipService.getPendingReceivedRequests(currentUsername);
     }
 
@@ -87,7 +87,7 @@ public class FriendshipRestController {
     }
 
     @GetMapping("/blocked")
-    public List<Users> getBlocked(@AuthenticationPrincipal String currentUsername) {
+    public List<UserSummaryDto> getBlocked(@AuthenticationPrincipal String currentUsername) {
         return friendshipService.getBlocked(currentUsername);
     }
 

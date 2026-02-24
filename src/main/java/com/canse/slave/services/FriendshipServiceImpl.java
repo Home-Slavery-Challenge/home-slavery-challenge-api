@@ -63,7 +63,7 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         // Blocked
         Set<String> blockedUsernames = this.getBlocked(currentUser).stream()
-                .map(Users::getUsername)
+                .map(UserSummaryDto::username)
                 .collect(java.util.stream.Collectors.toSet());
 
         // Pending
@@ -301,7 +301,7 @@ public class FriendshipServiceImpl implements FriendshipService {
      * @return liste des demandes reçues en attente
      */
     @Override
-    public List<Friendship> getPendingReceivedRequests(String currentUser) {
+    public List<FriendshipLiteProjection> getPendingReceivedRequests(String currentUser) {
         return friendshipRepository.getPendingsReceivedRequestsByUser(currentUser);
     }
 
@@ -325,11 +325,7 @@ public class FriendshipServiceImpl implements FriendshipService {
     @Override
     @Transactional
     public void markAsChecked(String currentUsername) {
-        List<Friendship> pendingReceived = getPendingReceivedRequests(currentUsername);
-
-        pendingReceived.forEach(f -> f.setChecked(true));
-
-        friendshipRepository.saveAll(pendingReceived);
+        friendshipRepository.markPendingReceivedAsChecked(currentUsername);
     }
 
     /**
@@ -377,7 +373,7 @@ public class FriendshipServiceImpl implements FriendshipService {
      * @return liste des utilisateurs bloqués
      */
     @Override
-    public List<Users> getBlocked(String currentUser) {
+    public List<UserSummaryDto> getBlocked(String currentUser) {
         return friendshipRepository.findBlockedUsersOf(currentUser);
     }
 
