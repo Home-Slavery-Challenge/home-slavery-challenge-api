@@ -1,12 +1,12 @@
 package com.canse.slave.services;
 
-import com.canse.slave.projections.ChallengeLiteProjection;
 import com.canse.slave.dto.CreateChallengeRequest;
 import com.canse.slave.entities.ChallengeGroup;
 import com.canse.slave.entities.Reward;
 import com.canse.slave.entities.Task;
 import com.canse.slave.entities.Users;
 import com.canse.slave.enums.RewardMode;
+import com.canse.slave.projections.ChallengeLiteProjection;
 import com.canse.slave.repos.ChallengeGroupRepository;
 import com.canse.slave.repos.RewardRepository;
 import com.canse.slave.repos.TaskRepository;
@@ -17,10 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -38,6 +35,21 @@ public class ChallengeServiceImpl implements ChallengeService {
     private TaskRepository taskRepository;
     @Autowired
     private RewardRepository rewardRepository;
+
+    @Override
+    public ChallengeGroup getChallengeById(String currentUsername, Long challengeId) {
+        ChallengeGroup c = challengeGroupRepository.findById(challengeId)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Challenge not found"));
+
+        Users u = Optional.ofNullable(userRepository.findByUsername(currentUsername))
+                .orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "User not found"));
+
+        if (!c.getOwner().getId().equals(u.getId())) {
+            throw new ResponseStatusException(FORBIDDEN, "No access to this challenge");
+        }
+
+        return c;
+    }
 
     @Override
     public void create(String currentUsername, CreateChallengeRequest req) {

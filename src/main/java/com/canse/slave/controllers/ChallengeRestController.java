@@ -1,5 +1,6 @@
 package com.canse.slave.controllers;
 
+import com.canse.slave.entities.ChallengeGroup;
 import com.canse.slave.projections.ChallengeLiteProjection;
 import com.canse.slave.dto.CreateChallengeRequest;
 import com.canse.slave.services.ChallengeService;
@@ -25,14 +26,20 @@ public class ChallengeRestController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @GetMapping("/")
+    @GetMapping("/light")
     public List<ChallengeLiteProjection> getLightChallenges(@AuthenticationPrincipal String currentUsername){
         return challengeService.getLightChallenges(currentUsername);
+    }
+
+    @GetMapping("/{id}")
+    public ChallengeGroup getChallenge(@AuthenticationPrincipal String currentUsername, @PathVariable Long id){
+        return challengeService.getChallengeById(currentUsername,id);
     }
 
     @DeleteMapping("/{challengeId}")
     public ResponseEntity<Void> deleteChallenge(@AuthenticationPrincipal String currentUsername,@PathVariable Long challengeId){
         this.challengeService.delete(currentUsername,challengeId);
         return ResponseEntity.noContent().build();    }
+
 
 }
