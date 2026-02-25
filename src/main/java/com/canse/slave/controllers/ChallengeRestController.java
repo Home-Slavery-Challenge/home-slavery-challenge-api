@@ -2,7 +2,6 @@ package com.canse.slave.controllers;
 
 import com.canse.slave.dto.ChallengeGroupDto;
 import com.canse.slave.dto.CreateChallengeRequest;
-import com.canse.slave.projections.ChallengeLiteProjection;
 import com.canse.slave.services.ChallengeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,9 +25,9 @@ public class ChallengeRestController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @GetMapping("/light")
-    public List<ChallengeLiteProjection> getLightChallenges(@AuthenticationPrincipal String currentUsername) {
-        return challengeService.getLightChallenges(currentUsername);
+    @GetMapping("/")
+    public List<ChallengeGroupDto> getChallenges(@AuthenticationPrincipal String currentUsername) {
+        return challengeService.getChallenges(currentUsername);
     }
 
     @GetMapping("/{id}")

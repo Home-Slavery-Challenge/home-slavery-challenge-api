@@ -2,7 +2,6 @@ package com.canse.slave.services;
 
 import com.canse.slave.dto.ChallengeGroupDto;
 import com.canse.slave.dto.CreateChallengeRequest;
-import com.canse.slave.projections.ChallengeLiteProjection;
 
 import java.util.List;
 
@@ -13,5 +12,5 @@ public interface ChallengeService {
 
     void delete(String currentUsername, Long challengeId);
 
-    List<ChallengeLiteProjection> getLightChallenges(String currentUsername);
+    List<ChallengeGroupDto> getChallenges(String currentUsername);
 }

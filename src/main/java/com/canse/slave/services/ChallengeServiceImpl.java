@@ -160,11 +160,14 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
-    public List<ChallengeLiteProjection> getLightChallenges(String currentUsername) {
-        Users user = userRepository.findByUsername(currentUsername);
-        if (user == null) {
-            throw new ResponseStatusException(UNAUTHORIZED, "User not found");
-        }
-        return challengeGroupRepository.findByParticipants_Id(user.getId());
+    public List<ChallengeGroupDto> getChallenges(String currentUsername) {
+
+        Users user = Optional.ofNullable(userRepository.findByUsername(currentUsername))
+                .orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "User not found"));
+
+        return challengeGroupRepository.findByParticipants_Id(user.getId())
+                .stream()
+                .map(ChallengeGroupMapper::toDto)
+                .toList();
     }
 }

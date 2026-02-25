@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ChallengeGroupRepository extends JpaRepository<ChallengeGroup, Long> {
-    List<ChallengeLiteProjection> findByParticipants_Id(Long userId);
+    List<ChallengeGroup> findByParticipants_Id(Long userId);
 }
