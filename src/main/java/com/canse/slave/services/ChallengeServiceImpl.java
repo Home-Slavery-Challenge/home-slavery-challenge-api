@@ -161,6 +161,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     @Override
     public List<ChallengeGroupDto> getChallenges(String currentUsername) {
+        System.out.println(currentUsername);
 
         Users user = Optional.ofNullable(userRepository.findByUsername(currentUsername))
                 .orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "User not found"));
