@@ -1,11 +1,13 @@
 package com.canse.slave.services;
 
+import com.canse.slave.dto.ChallengeGroupDto;
 import com.canse.slave.dto.CreateChallengeRequest;
 import com.canse.slave.entities.ChallengeGroup;
 import com.canse.slave.entities.Reward;
 import com.canse.slave.entities.Task;
 import com.canse.slave.entities.Users;
 import com.canse.slave.enums.RewardMode;
+import com.canse.slave.mappers.ChallengeGroupMapper;
 import com.canse.slave.projections.ChallengeLiteProjection;
 import com.canse.slave.repos.ChallengeGroupRepository;
 import com.canse.slave.repos.RewardRepository;
@@ -37,7 +39,8 @@ public class ChallengeServiceImpl implements ChallengeService {
     private RewardRepository rewardRepository;
 
     @Override
-    public ChallengeGroup getChallengeById(String currentUsername, Long challengeId) {
+    public ChallengeGroupDto getChallengeById(String currentUsername, Long challengeId) {
+
         ChallengeGroup c = challengeGroupRepository.findById(challengeId)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Challenge not found"));
 
@@ -48,7 +51,7 @@ public class ChallengeServiceImpl implements ChallengeService {
             throw new ResponseStatusException(FORBIDDEN, "No access to this challenge");
         }
 
-        return c;
+        return ChallengeGroupMapper.toDto(c);
     }
 
     @Override
