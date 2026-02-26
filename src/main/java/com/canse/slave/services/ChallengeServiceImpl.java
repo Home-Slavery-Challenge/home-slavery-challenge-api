@@ -8,7 +8,6 @@ import com.canse.slave.entities.Task;
 import com.canse.slave.entities.Users;
 import com.canse.slave.enums.RewardMode;
 import com.canse.slave.mappers.ChallengeGroupMapper;
-import com.canse.slave.projections.ChallengeLiteProjection;
 import com.canse.slave.repos.ChallengeGroupRepository;
 import com.canse.slave.repos.RewardRepository;
 import com.canse.slave.repos.TaskRepository;

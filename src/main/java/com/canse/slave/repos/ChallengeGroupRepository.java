@@ -1,6 +1,5 @@
 package com.canse.slave.repos;
 
-import com.canse.slave.projections.ChallengeLiteProjection;
 import com.canse.slave.entities.ChallengeGroup;
 import org.springframework.data.jpa.repository.JpaRepository;
 
