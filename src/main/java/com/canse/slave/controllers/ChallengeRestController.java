@@ -1,5 +1,6 @@
 package com.canse.slave.controllers;
 
+import com.canse.slave.api.ApiResponse;
 import com.canse.slave.dto.ChallengeGroupDto;
 import com.canse.slave.dto.CreateChallengeRequest;
 import com.canse.slave.services.ChallengeService;
@@ -41,8 +42,9 @@ public class ChallengeRestController {
         return ResponseEntity.noContent().build();
     }
 
-//    @PutMapping("/")
-//    public ChallengeGroup updateChallenge(@AuthenticationPrincipal String currentUser, @RequestBody )
-
-
+    @PatchMapping("/")
+    public ApiResponse<ChallengeGroupDto> updateChallenge(@AuthenticationPrincipal String currentUser, @RequestBody ChallengeGroupDto challenge) {
+        return challengeService.updateChallengeGroup(currentUser, challenge);
+    }
+    
 }

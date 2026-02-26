@@ -1,5 +1,6 @@
 package com.canse.slave.services;
 
+import com.canse.slave.api.ApiResponse;
 import com.canse.slave.dto.ChallengeGroupDto;
 import com.canse.slave.dto.CreateChallengeRequest;
 
@@ -13,4 +14,6 @@ public interface ChallengeService {
     void delete(String currentUsername, Long challengeId);
 
     List<ChallengeGroupDto> getChallenges(String currentUsername);
+
+    public ApiResponse<ChallengeGroupDto> updateChallengeGroup(String currentUser, ChallengeGroupDto dto);
 }

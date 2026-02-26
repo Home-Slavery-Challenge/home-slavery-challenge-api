@@ -1,7 +1,7 @@
 package com.canse.slave.services;
 
-import com.canse.slave.dto.ChallengeGroupDto;
-import com.canse.slave.dto.CreateChallengeRequest;
+import com.canse.slave.api.ApiResponse;
+import com.canse.slave.dto.*;
 import com.canse.slave.entities.ChallengeGroup;
 import com.canse.slave.entities.Reward;
 import com.canse.slave.entities.Task;
@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -169,5 +170,96 @@ public class ChallengeServiceImpl implements ChallengeService {
                 .stream()
                 .map(ChallengeGroupMapper::toDto)
                 .toList();
+    }
+
+    @Transactional
+    public ApiResponse<ChallengeGroupDto> updateChallengeGroup(String currentUser, ChallengeGroupDto dto) {
+
+        ChallengeGroup challengeEntity = challengeGroupRepository.findById(dto.id())
+                .orElseThrow(() ->  new ResponseStatusException(NOT_FOUND, "Group not exist"));
+
+        // ---  Auth  ---
+        if (!challengeEntity.getOwner().getUsername().equals(currentUser)) {
+            throw new ResponseStatusException(UNAUTHORIZED, "Owner incorrect");
+        }
+
+        List<String> changed = new ArrayList<>();
+
+        // --- Name ---
+        if (dto.name() != null && !dto.name().equals(challengeEntity.getName())) {
+            challengeEntity.setName(dto.name().trim());
+            changed.add("Name");
+        }
+
+        // --- Reward Mode ---
+        if (dto.rewardMode() != null && dto.rewardMode() != challengeEntity.getRewardMode()) {
+            challengeEntity.setRewardMode(dto.rewardMode());
+            changed.add("Reward Mode");
+        }
+
+        // --- participants ---
+        Set<Long> incomingParticipantIds = dto.participants().stream()
+                .map(UserRefDto::id)
+                .collect(Collectors.toSet());
+
+        Set<Long> currentParticipantIds = challengeEntity.getParticipants().stream()
+                .map(Users::getId)
+                .collect(Collectors.toSet());
+
+        if (!incomingParticipantIds.equals(currentParticipantIds)) {
+            List<Users> participants = userRepository.findAllById(incomingParticipantIds);
+            if (participants.size() != incomingParticipantIds.size()) {
+                throw new ResponseStatusException(NOT_FOUND, "One or more participants not found");
+            }
+            challengeEntity.setParticipants(new ArrayList<>(participants));
+            changed.add("Participants");
+        }
+
+        // --- availableTasks ---
+        Set<Long> incomingTaskIds = dto.availableTasks().stream()
+                .map(TaskDto::id)
+                .collect(Collectors.toSet());
+
+        Set<Long> currentTaskIds = challengeEntity.getAvailableTasks().stream()
+                .map(Task::getId)
+                .collect(Collectors.toSet());
+
+        if (!incomingTaskIds.equals(currentTaskIds)) {
+            List<Task> tasks = taskRepository.findAllById(incomingTaskIds);
+            if (tasks.size() != incomingTaskIds.size()) {
+                throw new ResponseStatusException(NOT_FOUND, "One or more tasks not found");
+            }
+            challengeEntity.setAvailableTasks(new ArrayList<>(tasks));
+            changed.add("Available Tasks");
+        }
+
+        // --- rewardPool ---
+        Set<Long> incomingRewardIds = dto.rewardPool().stream()
+                .map(RewardDto::id)
+                .collect(Collectors.toSet());
+
+        Set<Long> currentRewardIds = challengeEntity.getRewardPool().stream()
+                .map(Reward::getId)
+                .collect(Collectors.toSet());
+
+        if (!incomingRewardIds.equals(currentRewardIds)) {
+            List<Reward> rewards = rewardRepository.findAllById(incomingRewardIds);
+            if (rewards.size() != incomingRewardIds.size()) {
+                throw new ResponseStatusException(NOT_FOUND,"One or more rewards not found");
+
+            }
+            challengeEntity.setRewardPool(new ArrayList<>(rewards));
+            changed.add("Reward Pool");
+        }
+
+        ChallengeGroup saved = challengeGroupRepository.save(challengeEntity);
+        ChallengeGroupDto out = ChallengeGroupMapper.toDto(saved);
+
+        String message = changed.isEmpty()
+                ? "No changes"
+                : String.join(", ", changed);
+
+        return new ApiResponse<>(out, message, changed);
+
     }
 }
