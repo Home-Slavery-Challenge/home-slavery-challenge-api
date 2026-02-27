@@ -22,7 +22,8 @@ public class ChallengeGroupMapper {
                 c.getRewardPool().stream()
                         .map(r -> new RewardDto(r.getId(), r.getName(), r.getDescription()))
                         .toList(),
-                c.getRewardMode()
+                c.getRewardMode(),
+                c.getRecurringReward()
         );
     }
 }

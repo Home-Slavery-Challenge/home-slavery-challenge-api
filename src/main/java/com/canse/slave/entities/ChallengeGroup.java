@@ -54,4 +54,8 @@ public class ChallengeGroup {
 
     @Enumerated(EnumType.STRING)
     private RewardMode rewardMode;
+
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "fixed_reward_id", nullable = true)
+    private Reward recurringReward;
 }
