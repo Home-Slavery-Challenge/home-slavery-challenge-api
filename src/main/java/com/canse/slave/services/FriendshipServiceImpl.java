@@ -1,6 +1,6 @@
 package com.canse.slave.services;
 
-import com.canse.slave.dto.UserSummaryDto;
+import com.canse.slave.dto.UserRefDto;
 import com.canse.slave.entities.Friendship;
 import com.canse.slave.entities.Users;
 import com.canse.slave.enums.FriendshipStatus;
@@ -54,7 +54,7 @@ public class FriendshipServiceImpl implements FriendshipService {
      */
 
     @Override
-    public List<UserSummaryDto> searchUsersByName(String query, String currentUser) {
+    public List<UserRefDto> searchUsersByName(String query, String currentUser) {
 
         // Accepted
         Set<String> acceptedUsernames = this.getFriends(currentUser).stream()
@@ -63,7 +63,7 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         // Blocked
         Set<String> blockedUsernames = this.getBlocked(currentUser).stream()
-                .map(UserSummaryDto::username)
+                .map(UserRefDto::username)
                 .collect(java.util.stream.Collectors.toSet());
 
         // Pending
@@ -349,7 +349,7 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     @Override
-    public List<UserSummaryDto> getSummaryFriends(String currentUser) {
+    public List<UserRefDto> getSummaryFriends(String currentUser) {
         List<Friendship> friendships =
                 friendshipRepository.findAcceptedFriendshipsOfUser(currentUser);
 
@@ -358,7 +358,7 @@ public class FriendshipServiceImpl implements FriendshipService {
                         ? f.getReceiver()
                         : f.getRequester())
                 .distinct()
-                .map(u -> new UserSummaryDto(u.getId(), u.getUsername()))
+                .map(u -> new UserRefDto(u.getId(), u.getUsername()))
                 .toList();
     }
 
@@ -373,7 +373,7 @@ public class FriendshipServiceImpl implements FriendshipService {
      * @return liste des utilisateurs bloqués
      */
     @Override
-    public List<UserSummaryDto> getBlocked(String currentUser) {
+    public List<UserRefDto> getBlocked(String currentUser) {
         return friendshipRepository.findBlockedUsersOf(currentUser);
     }
 

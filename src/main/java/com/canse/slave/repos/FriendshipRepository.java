@@ -1,6 +1,6 @@
 package com.canse.slave.repos;
 
-import com.canse.slave.dto.UserSummaryDto;
+import com.canse.slave.dto.UserRefDto;
 import com.canse.slave.entities.Friendship;
 import com.canse.slave.entities.Users;
 import com.canse.slave.projections.FriendshipLiteProjection;
@@ -76,13 +76,13 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
 
 
     @Query("""
-                select distinct new com.canse.slave.dto.UserSummaryDto(u.id, u.username)
+                select distinct new com.canse.slave.dto.UserRefDto(u.id, u.username)
                 from Friendship f
                 join f.receiver u
                 where f.status = com.canse.slave.enums.FriendshipStatus.BLOCKED
                   and f.requester.username = :currentUser
             """)
-    List<UserSummaryDto> findBlockedUsersOf(@Param("currentUser") String currentUser);
+    List<UserRefDto> findBlockedUsersOf(@Param("currentUser") String currentUser);
 
 
     @Modifying

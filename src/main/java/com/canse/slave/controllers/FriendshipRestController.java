@@ -1,8 +1,6 @@
 package com.canse.slave.controllers;
 
-import com.canse.slave.dto.UserSummaryDto;
-import com.canse.slave.entities.Friendship;
-import com.canse.slave.entities.Users;
+import com.canse.slave.dto.UserRefDto;
 import com.canse.slave.projections.FriendshipLiteProjection;
 import com.canse.slave.services.FriendshipService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +20,7 @@ public class FriendshipRestController {
     FriendshipService friendshipService;
 
     @GetMapping("/search-by-name/{query}")
-    public List<UserSummaryDto> getUsersByName(@PathVariable String query, @AuthenticationPrincipal String currentUsername) {
+    public List<UserRefDto> getUsersByName(@PathVariable String query, @AuthenticationPrincipal String currentUsername) {
         return friendshipService.searchUsersByName(query, currentUsername);
     }
 
@@ -45,7 +43,7 @@ public class FriendshipRestController {
 
     @PostMapping("/decline-friendship/{userIdTarget}")
     public void declineFriendshipRequest(@PathVariable Long userIdTarget, @AuthenticationPrincipal String currentUser) {
-        friendshipService.declineFriendship(userIdTarget,currentUser);
+        friendshipService.declineFriendship(userIdTarget, currentUser);
     }
 
     @PostMapping("/block-user/{friendshipId}")
@@ -63,7 +61,7 @@ public class FriendshipRestController {
 
     @PostMapping("/unblock-user/{userIdReceiver}")
     public void unblockUser(@PathVariable Long userIdReceiver, @AuthenticationPrincipal String currentUser) {
-        friendshipService.unblockUser(userIdReceiver,currentUser);
+        friendshipService.unblockUser(userIdReceiver, currentUser);
     }
 
     @GetMapping("/pending-received")
@@ -82,12 +80,12 @@ public class FriendshipRestController {
     }
 
     @GetMapping("/friends")
-    public List<UserSummaryDto> getSummaryFriends(@AuthenticationPrincipal String currentUsername) {
+    public List<UserRefDto> getSummaryFriends(@AuthenticationPrincipal String currentUsername) {
         return friendshipService.getSummaryFriends(currentUsername);
     }
 
     @GetMapping("/blocked")
-    public List<UserSummaryDto> getBlocked(@AuthenticationPrincipal String currentUsername) {
+    public List<UserRefDto> getBlocked(@AuthenticationPrincipal String currentUsername) {
         return friendshipService.getBlocked(currentUsername);
     }
 
