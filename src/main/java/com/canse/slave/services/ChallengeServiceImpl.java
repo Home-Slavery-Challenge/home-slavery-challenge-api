@@ -247,12 +247,37 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         if (!incomingTaskIds.equals(currentTaskIds)) {
             challengeEntity.setAvailableTasks(new ArrayList<>(resolvedTasks));
-            changed.add("availableTasks");
+            changed.add("Available Tasks");
         }
 
         // --- rewardPool ---
-        Set<Long> incomingRewardIds = dto.rewardPool().stream()
-                .map(RewardDto::id)
+        List<RewardDto> incomingRewardsDto = dto.rewardPool() == null ? List.of() : dto.rewardPool();
+
+        List<Reward> resolvedRewards = new ArrayList<>();
+        for (RewardDto r : incomingRewardsDto) {
+            if (r.id() != null) {
+                Reward existing = rewardRepository.findById(r.id())
+                        .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Reward not found: " + r.id()));
+                resolvedRewards.add(existing);
+            } else {
+                // CREATE
+                if (r.name() == null || r.name().isBlank()) {
+                    throw new ResponseStatusException(BAD_REQUEST, "Reward name is required");
+                }
+                // description peut être optionnelle selon ton choix
+                String desc = (r.description() == null) ? "" : r.description().trim();
+
+                Reward created = new Reward();
+                created.setName(r.name().trim());
+                created.setDescription(desc);
+                created = rewardRepository.save(created);
+
+                resolvedRewards.add(created);
+            }
+        }
+
+        Set<Long> incomingRewardIds = resolvedRewards.stream()
+                .map(Reward::getId)
                 .collect(Collectors.toSet());
 
         Set<Long> currentRewardIds = challengeEntity.getRewardPool().stream()
@@ -260,15 +285,11 @@ public class ChallengeServiceImpl implements ChallengeService {
                 .collect(Collectors.toSet());
 
         if (!incomingRewardIds.equals(currentRewardIds)) {
-            List<Reward> rewards = rewardRepository.findAllById(incomingRewardIds);
-            if (rewards.size() != incomingRewardIds.size()) {
-                throw new ResponseStatusException(NOT_FOUND, "One or more rewards not found");
-
-            }
-            challengeEntity.setRewardPool(new ArrayList<>(rewards));
+            challengeEntity.setRewardPool(new ArrayList<>(resolvedRewards));
             changed.add("Reward Pool");
         }
 
+        // --- Response build ---
         ChallengeGroup saved = challengeGroupRepository.save(challengeEntity);
         ChallengeGroupDto out = ChallengeGroupMapper.toDto(saved);
 
