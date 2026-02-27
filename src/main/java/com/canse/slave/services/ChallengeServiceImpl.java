@@ -176,7 +176,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     public ApiResponse<ChallengeGroupDto> updateChallengeGroup(String currentUser, ChallengeGroupDto dto) {
 
         ChallengeGroup challengeEntity = challengeGroupRepository.findById(dto.id())
-                .orElseThrow(() ->  new ResponseStatusException(NOT_FOUND, "Group not exist"));
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Group not exist"));
 
         // ---  Auth  ---
         if (!challengeEntity.getOwner().getUsername().equals(currentUser)) {
@@ -216,21 +216,38 @@ public class ChallengeServiceImpl implements ChallengeService {
         }
 
         // --- availableTasks ---
-        Set<Long> incomingTaskIds = dto.availableTasks().stream()
-                .map(TaskDto::id)
-                .collect(Collectors.toSet());
+        List<TaskDto> incomingTasksDto = dto.availableTasks() == null ? List.of() : dto.availableTasks();
 
-        Set<Long> currentTaskIds = challengeEntity.getAvailableTasks().stream()
-                .map(Task::getId)
-                .collect(Collectors.toSet());
+        List<Task> resolvedTasks = new ArrayList<>();
+        for (TaskDto t : incomingTasksDto) {
+            if (t.id() != null) {
+                Task existing = taskRepository.findById(t.id())
+                        .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Task not found: " + t.id()));
+                resolvedTasks.add(existing);
+            } else {
+                // CREATE
+                if (t.name() == null || t.name().isBlank()) {
+                    throw new ResponseStatusException(BAD_REQUEST, "Task name is required");
+                }
+                if (t.defaultsPoints() == null) {
+                    throw new ResponseStatusException(BAD_REQUEST, "Task defaultsPoints is required");
+                }
+
+                Task created = new Task();
+                created.setName(t.name().trim());
+                created.setDefaultsPoints(t.defaultsPoints());
+                created = taskRepository.save(created);
+
+                resolvedTasks.add(created);
+            }
+        }
+
+        Set<Long> incomingTaskIds = resolvedTasks.stream().map(Task::getId).collect(Collectors.toSet());
+        Set<Long> currentTaskIds = challengeEntity.getAvailableTasks().stream().map(Task::getId).collect(Collectors.toSet());
 
         if (!incomingTaskIds.equals(currentTaskIds)) {
-            List<Task> tasks = taskRepository.findAllById(incomingTaskIds);
-            if (tasks.size() != incomingTaskIds.size()) {
-                throw new ResponseStatusException(NOT_FOUND, "One or more tasks not found");
-            }
-            challengeEntity.setAvailableTasks(new ArrayList<>(tasks));
-            changed.add("Available Tasks");
+            challengeEntity.setAvailableTasks(new ArrayList<>(resolvedTasks));
+            changed.add("availableTasks");
         }
 
         // --- rewardPool ---
@@ -245,7 +262,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         if (!incomingRewardIds.equals(currentRewardIds)) {
             List<Reward> rewards = rewardRepository.findAllById(incomingRewardIds);
             if (rewards.size() != incomingRewardIds.size()) {
-                throw new ResponseStatusException(NOT_FOUND,"One or more rewards not found");
+                throw new ResponseStatusException(NOT_FOUND, "One or more rewards not found");
 
             }
             challengeEntity.setRewardPool(new ArrayList<>(rewards));
