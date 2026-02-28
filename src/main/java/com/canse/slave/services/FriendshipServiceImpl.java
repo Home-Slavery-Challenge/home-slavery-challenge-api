@@ -1,16 +1,22 @@
 package com.canse.slave.services;
 
+import com.canse.slave.dto.UserRefDto;
 import com.canse.slave.entities.Friendship;
 import com.canse.slave.entities.Users;
 import com.canse.slave.enums.FriendshipStatus;
+import com.canse.slave.projections.FriendshipLiteProjection;
 import com.canse.slave.repos.FriendshipRepository;
 import com.canse.slave.repos.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Set;
+
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 
 // TODO : Créer des DTO pour exposer les données au front
 
@@ -48,7 +54,7 @@ public class FriendshipServiceImpl implements FriendshipService {
      */
 
     @Override
-    public List<Users> searchUsersByName(String query, String currentUser) {
+    public List<UserRefDto> searchUsersByName(String query, String currentUser) {
 
         // Accepted
         Set<String> acceptedUsernames = this.getFriends(currentUser).stream()
@@ -57,7 +63,7 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         // Blocked
         Set<String> blockedUsernames = this.getBlocked(currentUser).stream()
-                .map(Users::getUsername)
+                .map(UserRefDto::username)
                 .collect(java.util.stream.Collectors.toSet());
 
         // Pending
@@ -68,13 +74,13 @@ public class FriendshipServiceImpl implements FriendshipService {
         // Filters
         return userRepository.findByUsernameContainsIgnoreCase(query).stream()
                 // current
-                .filter(u -> !u.getUsername().equalsIgnoreCase(currentUser))
+                .filter(u -> !u.username().equalsIgnoreCase(currentUser))
                 // accepted
-                .filter(u -> !acceptedUsernames.contains(u.getUsername()))
+                .filter(u -> !acceptedUsernames.contains(u.username()))
                 // blocked
-                .filter(u -> !blockedUsernames.contains(u.getUsername()))
+                .filter(u -> !blockedUsernames.contains(u.username()))
                 // pending
-                .filter(u -> !pendingReceiverIds.contains(u.getId()))
+                .filter(u -> !pendingReceiverIds.contains(u.id()))
                 .toList();
     }
 
@@ -89,7 +95,7 @@ public class FriendshipServiceImpl implements FriendshipService {
      * @return la relation d'amitié existante ou nouvellement créée
      */
     @Override
-    public Friendship sendFriendRequest(String currentUser, Long targetUserId) {
+    public void sendFriendRequest(String currentUser, Long targetUserId) {
 
         Users userRequester = userRepository.findByUsername(currentUser);
         if (userRequester == null) {
@@ -102,7 +108,7 @@ public class FriendshipServiceImpl implements FriendshipService {
         Friendship friendshipAlreadyExist =
                 friendshipRepository.getAlreadyExistsFriendship(userRequester.getId(), userReceiver.getId());
         if (friendshipAlreadyExist != null) {
-            return friendshipAlreadyExist;
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Friendship already exist");
         }
 
         Friendship friendship = new Friendship();
@@ -110,7 +116,7 @@ public class FriendshipServiceImpl implements FriendshipService {
         friendship.setReceiver(userReceiver);
         friendship.setChecked(false);
         friendship.setStatus(FriendshipStatus.PENDING);
-        return friendshipRepository.save(friendship);
+        friendshipRepository.save(friendship);
     }
 
     /**
@@ -175,16 +181,24 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     /*
-    * Decline friendship by user id targeted with current user token
-    * */
+     * Decline friendship by user id targeted with current user token
+     * */
 
     @Override
-    public void declineFriendship(Long userIdTarget, String currentUser) {
-        List<Friendship> listA = friendshipRepository.getAllFriendshipByRequester(currentUser);
-        List<Friendship> listB = friendshipRepository.getAllFriendshipByReceiver(userIdTarget);
+    public void declineFriendship(Long userIdTarget, String currentUsername) {
+        Users current = userRepository.findByUsername(currentUsername);
+        if (current == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found");
+        }
 
-        friendshipRepository.deleteAll(listA);
-        friendshipRepository.deleteAll(listB);
+        List<Friendship> relations = friendshipRepository.findAllBetweenUsers(current.getId(), userIdTarget);
+
+        if (relations.isEmpty()) {
+            return;
+            // throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Friendship not found");
+        }
+
+        friendshipRepository.deleteAll(relations);
     }
 
     /**
@@ -198,7 +212,7 @@ public class FriendshipServiceImpl implements FriendshipService {
      * Aucun lien d'amitié préalable n'est nécessaire.
      */
     @Override
-    public Friendship blockUser(Long userIdToBlock, String currentUser) {
+    public void blockUser(Long userIdToBlock, String currentUser) {
 
         Users blocker = userRepository.findByUsername(currentUser);
         if (blocker == null) {
@@ -219,7 +233,7 @@ public class FriendshipServiceImpl implements FriendshipService {
         friendship.setChecked(true);
         friendship.setStatus(FriendshipStatus.BLOCKED);
 
-        return friendshipRepository.save(friendship);
+        friendshipRepository.save(friendship);
     }
 
     /**
@@ -287,7 +301,7 @@ public class FriendshipServiceImpl implements FriendshipService {
      * @return liste des demandes reçues en attente
      */
     @Override
-    public List<Friendship> getPendingReceivedRequests(String currentUser) {
+    public List<FriendshipLiteProjection> getPendingReceivedRequests(String currentUser) {
         return friendshipRepository.getPendingsReceivedRequestsByUser(currentUser);
     }
 
@@ -299,7 +313,7 @@ public class FriendshipServiceImpl implements FriendshipService {
      * @return liste des demandes envoyées en attente
      */
     @Override
-    public List<Friendship> getPendingSentRequests(String currentUser) {
+    public List<FriendshipLiteProjection> getPendingSentRequests(String currentUser) {
         return friendshipRepository.getPendingsSentRequests(currentUser);
     }
 
@@ -311,11 +325,7 @@ public class FriendshipServiceImpl implements FriendshipService {
     @Override
     @Transactional
     public void markAsChecked(String currentUsername) {
-        List<Friendship> pendingReceived = getPendingReceivedRequests(currentUsername);
-
-        pendingReceived.forEach(f -> f.setChecked(true));
-
-        friendshipRepository.saveAll(pendingReceived);
+        friendshipRepository.markPendingReceivedAsChecked(currentUsername);
     }
 
     /**
@@ -338,6 +348,20 @@ public class FriendshipServiceImpl implements FriendshipService {
                 .toList();
     }
 
+    @Override
+    public List<UserRefDto> getSummaryFriends(String currentUser) {
+        List<Friendship> friendships =
+                friendshipRepository.findAcceptedFriendshipsOfUser(currentUser);
+
+        return friendships.stream()
+                .map(f -> f.getRequester().getUsername().equals(currentUser)
+                        ? f.getReceiver()
+                        : f.getRequester())
+                .distinct()
+                .map(u -> new UserRefDto(u.getId(), u.getUsername()))
+                .toList();
+    }
+
     /**
      * Récupère liste utilisateurs bloqués par l'utilisateur courant.
      * <p>
@@ -349,7 +373,7 @@ public class FriendshipServiceImpl implements FriendshipService {
      * @return liste des utilisateurs bloqués
      */
     @Override
-    public List<Users> getBlocked(String currentUser) {
+    public List<UserRefDto> getBlocked(String currentUser) {
         return friendshipRepository.findBlockedUsersOf(currentUser);
     }
 

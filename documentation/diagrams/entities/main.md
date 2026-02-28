@@ -82,8 +82,13 @@ class ChallengeGroup{
     List<ChallengePeriod> periods
     List<Task> availableTasks
     List<Reward> rewardPool
-    boolean rewardIsRandom
-    boolean rewardIsRecurring
+    RewardMode rewardMode;
+}
+
+class RewardMode {
+<<enumeration>>
+RECURRING
+RANDOM
 }
 
 class ChallengePeriod{

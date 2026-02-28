@@ -31,9 +31,20 @@ Cette documentation présente :
     * la liste des récompenses (`Reward`),
     * le mode de sélection de la récompense :
 
-        * aléatoire (`rewardIsRandom = true`)
+        * aléatoire (`rewardIsRandom = true`) 
         * ou récurrente (`rewardIsRecurring = true`)
 * Les autres joueurs rejoignent en tant que **participants**.
+
+
+ Si `rewardList.length === 1`, alors la récompense est **récurrente**.
+
+ Si `rewardList.length > 1`, la **récurrence est activable ou non** :
+
+ * `rewardMode = false` → RewardMode.RECURRING
+ * `rewardMode = true` → RewardMode.RANDOM
+
+ Dans le cas de la définition d’une **période de challenge**, une récompense est **attribuée automatiquement** au challenge et **peut être modifiée par un administrateur**.
+
 
 ---
 

@@ -1,7 +1,9 @@
 package com.canse.slave.repos;
 
+import com.canse.slave.dto.UserRefDto;
 import com.canse.slave.entities.Friendship;
 import com.canse.slave.entities.Users;
+import com.canse.slave.projections.FriendshipLiteProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -11,15 +13,20 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
-    @Query("SELECT f FROM Friendship f WHERE  f.status = 'PENDING' AND f.receiver.username = :currentUser")
-    List<Friendship> getPendingsReceivedRequestsByUser(@Param("currentUser") String currentUser);
+    @Query("""
+              select f
+              from Friendship f
+              where f.status = com.canse.slave.enums.FriendshipStatus.PENDING
+                and f.receiver.username = :currentUser
+            """)
+    List<FriendshipLiteProjection> getPendingsReceivedRequestsByUser(@Param("currentUser") String currentUser);
 
     @Query("""
             SELECT f FROM Friendship f
             WHERE f.status = 'PENDING'
               AND f.requester.username = :currentUser
             """)
-    List<Friendship> getPendingsSentRequests(@Param("currentUser") String currentUser);
+    List<FriendshipLiteProjection> getPendingsSentRequests(@Param("currentUser") String currentUser);
 
     @Query("""
             SELECT f FROM Friendship f
@@ -69,24 +76,42 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
 
 
     @Query("""
-            SELECT DISTINCT f.receiver
-            FROM Friendship f
-            WHERE f.status = 'BLOCKED'
-              AND f.requester.username = :currentUser
+                select distinct new com.canse.slave.dto.UserRefDto(u.id, u.username)
+                from Friendship f
+                join f.receiver u
+                where f.status = com.canse.slave.enums.FriendshipStatus.BLOCKED
+                  and f.requester.username = :currentUser
             """)
-    List<Users> findBlockedUsersOf(@Param("currentUser") String currentUser);
+    List<UserRefDto> findBlockedUsersOf(@Param("currentUser") String currentUser);
 
 
     @Modifying
     @Transactional
     @Query("""
-        DELETE FROM Friendship f
-        WHERE f.receiver.id = :receiverId
-          AND f.requester.username = :currentUser
-        """)
+            DELETE FROM Friendship f
+            WHERE f.receiver.id = :receiverId
+              AND f.requester.username = :currentUser
+            """)
     void deleteFriendshipByCurrenttargetRequester(
             @Param("currentUser") String currentUser,
             @Param("receiverId") Long receiverId
     );
 
+    @Query("""
+                select f from Friendship f
+                where (f.requester.id = :currentId and f.receiver.id = :targetId)
+                   or (f.requester.id = :targetId and f.receiver.id = :currentId)
+            """)
+    List<Friendship> findAllBetweenUsers(@Param("currentId") Long currentId,
+                                         @Param("targetId") Long targetId);
+
+    @Modifying
+    @Transactional
+    @Query("""
+              update Friendship f
+              set f.isChecked = true
+              where f.status = com.canse.slave.enums.FriendshipStatus.PENDING
+                and f.receiver.username = :currentUser
+            """)
+    void markPendingReceivedAsChecked(@Param("currentUser") String currentUser);
 }
