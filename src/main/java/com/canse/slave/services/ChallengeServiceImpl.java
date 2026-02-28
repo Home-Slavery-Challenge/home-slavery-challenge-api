@@ -191,12 +191,6 @@ public class ChallengeServiceImpl implements ChallengeService {
             changed.add("Name");
         }
 
-        // --- Reward Mode ---
-        if (dto.rewardMode() != null && dto.rewardMode() != challengeEntity.getRewardMode()) {
-            challengeEntity.setRewardMode(dto.rewardMode());
-            changed.add("Reward Mode");
-        }
-
         // --- participants ---
         Set<Long> incomingParticipantIds = dto.participants().stream()
                 .map(UserRefDto::id)
@@ -260,11 +254,9 @@ public class ChallengeServiceImpl implements ChallengeService {
                         .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Reward not found: " + r.id()));
                 resolvedRewards.add(existing);
             } else {
-                // CREATE
                 if (r.name() == null || r.name().isBlank()) {
                     throw new ResponseStatusException(BAD_REQUEST, "Reward name is required");
                 }
-                // description peut être optionnelle selon ton choix
                 String desc = (r.description() == null) ? "" : r.description().trim();
 
                 Reward created = new Reward();
@@ -288,6 +280,52 @@ public class ChallengeServiceImpl implements ChallengeService {
             challengeEntity.setRewardPool(new ArrayList<>(resolvedRewards));
             changed.add("Reward Pool");
         }
+
+        // --- reward mode + recurring reward ---
+        if (dto.rewardMode() != null) {
+
+            RewardMode incomingMode = dto.rewardMode();
+            RewardMode currentMode = challengeEntity.getRewardMode();
+
+            Reward resolvedRecurring = null;
+
+            if (incomingMode == RewardMode.RECURRING) {
+                if (dto.recurringReward() == null || dto.recurringReward().getId() == null) {
+                    throw new ResponseStatusException(BAD_REQUEST,
+                            "recurringReward.id is required when rewardMode is RECURRING");
+                }
+
+                Long recurringId = dto.recurringReward().getId();
+
+                resolvedRecurring = resolvedRewards.stream()
+                        .filter(r -> r.getId().equals(recurringId))
+                        .findFirst()
+                        .orElseThrow(() -> new ResponseStatusException(BAD_REQUEST,
+                                "recurringReward must be one of rewardPool"));
+            }
+
+            if (incomingMode != currentMode) {
+                challengeEntity.setRewardMode(incomingMode);
+                changed.add("Reward Mode");
+            }
+
+            if (incomingMode == RewardMode.RANDOM) {
+                if (challengeEntity.getRecurringReward() != null) {
+                    challengeEntity.setRecurringReward(null);
+                    changed.add("Recurring Reward");
+                }
+            } else {
+                Reward currentRecurring = challengeEntity.getRecurringReward();
+                boolean recurringChanged =
+                        currentRecurring == null || !currentRecurring.getId().equals(resolvedRecurring.getId());
+
+                if (recurringChanged) {
+                    challengeEntity.setRecurringReward(resolvedRecurring);
+                    changed.add("Recurring Reward");
+                }
+            }
+        }
+
 
         // --- Response build ---
         ChallengeGroup saved = challengeGroupRepository.save(challengeEntity);
