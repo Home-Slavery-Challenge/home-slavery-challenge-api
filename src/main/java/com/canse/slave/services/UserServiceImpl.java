@@ -13,8 +13,10 @@ import com.canse.slave.repos.VerificationTokenRepository;
 import com.canse.slave.utils.EmailSender;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
@@ -41,6 +43,17 @@ public class UserServiceImpl implements UserService {
     public Users saveUser(Users user) {
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         return this.userRepository.save(user);
+    }
+
+    @Override
+    public void forgotPassword(String email) {
+        Users byEmail = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        String newPwd = "password" + generateCode();
+        byEmail.setPassword(bCryptPasswordEncoder.encode(newPwd));
+        userRepository.save(byEmail);
+        sendNewPassword(byEmail, newPwd);
     }
 
     @Override
@@ -114,14 +127,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void sendNewPassword(Users user, String code) {
+        String body = "Bonjour " + "<h1>" + user.getUsername() + "</h1>" + " Votre mot de passe : " + "<h1>" + code + "</h1>";
+        emailSender.sendEmail(user.getEmail(), body);
+    }
+
+    @Override
     public Users validateToken(String code) {
         VerificationToken token = verifTokenRepository.findByToken(code);
-        if(token == null){
-            throw  new InvalidTokenException("Invalide token !");
+        if (token == null) {
+            throw new InvalidTokenException("Invalide token !");
         }
         Users user = token.getUser();
         Calendar calendar = Calendar.getInstance();
-        if((token.getExpirationTime().getTime() - calendar.getTime().getTime()) <= 0){
+        if ((token.getExpirationTime().getTime() - calendar.getTime().getTime()) <= 0) {
             verifTokenRepository.delete(token);
             throw new ExpiredTokenException("Expired token !");
         }

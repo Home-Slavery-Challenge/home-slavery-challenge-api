@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface UserService {
     Users saveUser(Users user);
+    void forgotPassword(String email);
     Users findUserByUsername(String username);
     Role addRole(Role role);
     List<Role> getRoles();
@@ -15,5 +16,6 @@ public interface UserService {
     List<Users> findAllUsers();
     Users registerUser(RegistrationRequest request);
     public void sendEmailUser(Users user, String code);
+    public void sendNewPassword(Users user, String code);
     public Users validateToken(String code);
 }

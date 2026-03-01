@@ -5,6 +5,8 @@ import com.canse.slave.entities.RegistrationRequest;
 import com.canse.slave.entities.Users;
 import com.canse.slave.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,12 +17,18 @@ public class AuthRestController {
     UserService userService;
 
     @PostMapping("/register")
-    public Users register(@RequestBody RegistrationRequest registrationRequest){
+    public Users register(@RequestBody RegistrationRequest registrationRequest) {
         return userService.registerUser(registrationRequest);
     }
 
     @GetMapping("/verify-email/{token}")
-    public Users verifyEmail(@PathVariable String token){
+    public Users verifyEmail(@PathVariable String token) {
         return userService.validateToken(token);
+    }
+
+    @GetMapping("/forgot-password/{email}")
+    public ResponseEntity<Void> forgotPassword(@PathVariable String email) {
+        userService.forgotPassword(email);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 }
