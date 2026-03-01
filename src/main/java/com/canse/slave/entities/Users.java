@@ -21,7 +21,6 @@ public class Users {
     private Long id;
     @Column(unique = true)
     private String username;
-    @JsonIgnore
     private String password;
     private Boolean enabled;
     private String email;
