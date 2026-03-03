@@ -1,12 +1,15 @@
 package com.canse.slave.controllers;
 
 
+import com.canse.slave.dto.ModifyPasswordRequest;
+import com.canse.slave.dto.UserDetailsDto;
 import com.canse.slave.entities.RegistrationRequest;
 import com.canse.slave.entities.Users;
 import com.canse.slave.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,5 +33,15 @@ public class AuthRestController {
     public ResponseEntity<Void> forgotPassword(@PathVariable String email) {
         userService.forgotPassword(email);
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
+
+    @GetMapping("/info")
+    public UserDetailsDto getUserInfo(@AuthenticationPrincipal String currentUsername){
+        return userService.getUserInfo(currentUsername);
+    }
+
+    @PostMapping("/update-password")
+    public void updatePassword(@AuthenticationPrincipal String currentUsername, @RequestBody ModifyPasswordRequest passwordRequest) {
+        userService.modifyPassword(currentUsername, passwordRequest);
     }
 }

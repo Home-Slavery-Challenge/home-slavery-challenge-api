@@ -1,5 +1,7 @@
 package com.canse.slave.services;
 
+import com.canse.slave.dto.ModifyPasswordRequest;
+import com.canse.slave.dto.UserDetailsDto;
 import com.canse.slave.entities.RegistrationRequest;
 import com.canse.slave.entities.Role;
 import com.canse.slave.entities.Users;
@@ -18,4 +20,6 @@ public interface UserService {
     public void sendEmailUser(Users user, String code);
     public void sendNewPassword(Users user, String code);
     public Users validateToken(String code);
-}
+    public UserDetailsDto getUserInfo(String username);
+    public void modifyPassword(String username, ModifyPasswordRequest passwordRequest) ;
+    }
