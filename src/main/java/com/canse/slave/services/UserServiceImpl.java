@@ -1,5 +1,7 @@
 package com.canse.slave.services;
 
+import com.canse.slave.dto.ModifyPasswordRequest;
+import com.canse.slave.dto.UserDetailsDto;
 import com.canse.slave.entities.RegistrationRequest;
 import com.canse.slave.entities.Role;
 import com.canse.slave.entities.Users;
@@ -26,6 +28,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    ChallengeService challengeService;
+
+    @Autowired
+    FriendshipService friendshipService;
 
     @Autowired
     RoleRepository roleRepository;
@@ -147,5 +155,40 @@ public class UserServiceImpl implements UserService {
         user.setEnabled(true);
         userRepository.save(user);
         return user;
+    }
+
+    @Override
+    public UserDetailsDto getUserInfo(String username) {
+        Users u = userRepository.findByUsername(username);
+        Integer nbChallenge = challengeService.getChallenges(username).size();
+        Integer nbFriend = friendshipService.getFriends(username).size();
+        return new UserDetailsDto(u.getId(), u.getUsername(), u.getEmail(), u.getCreatedAt(), u.getUpdatedAt(), nbChallenge, nbFriend);
+    }
+
+    @Override
+    public void modifyPassword(String username, ModifyPasswordRequest p) {
+        Users u = userRepository.findByUsername(username);
+        if (u == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+
+        if (p.oldPassword() == null || p.oldPassword().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Old password is required");
+        }
+
+        if (p.newPassword() == null || p.newPassword().isBlank() || p.newPassword().length() < 6 || p.newPassword().length() > 25) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid new password");
+        }
+
+        if (!bCryptPasswordEncoder.matches(p.oldPassword(), u.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Old password incorrect");
+        }
+
+        if (bCryptPasswordEncoder.matches(p.newPassword(), u.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password must be different");
+        }
+
+        u.setPassword(bCryptPasswordEncoder.encode(p.newPassword()));
+        userRepository.save(u);
     }
 }
