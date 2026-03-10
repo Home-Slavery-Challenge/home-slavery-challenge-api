@@ -40,7 +40,7 @@ public class AuthRestController {
         return userService.getUserInfo(currentUsername);
     }
 
-    @PostMapping("/update-password")
+    @PutMapping("/update-password")
     public void updatePassword(@AuthenticationPrincipal String currentUsername, @RequestBody ModifyPasswordRequest passwordRequest) {
         userService.modifyPassword(currentUsername, passwordRequest);
     }
